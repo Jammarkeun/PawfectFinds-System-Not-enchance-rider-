@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Become a Seller - Pawfect Finds{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header text-center bg-success text-white">
+                    <h4><i class="fas fa-handshake"></i> Become a Seller</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Join our community of pet product sellers!</strong>
+                        Fill out the form below to apply for seller privileges. Our admin team will review your application and get back to you soon.
+                    </div>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="business_name" class="form-label">
+                                <i class="fas fa-store"></i> Business Name *
+                            </label>
+                            {{ form.business_name(class="form-control", placeholder="Enter your business/store name", required=True) }}
+                            {% for error in form.business_name.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="business_description" class="form-label">
+                                <i class="fas fa-align-left"></i> Business Description *
+                            </label>
+                            {{ form.business_description(class="form-control", rows=4, placeholder="Describe your business and the types of pet products you plan to sell...", required=True) }}
+                            {% for error in form.business_description.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="business_address" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Business Address *
+                            </label>
+                            {{ form.business_address(class="form-control", rows=2, placeholder="Enter your complete business address", required=True) }}
+                            {% for error in form.business_address.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="business_phone" class="form-label">
+                                    <i class="fas fa-phone"></i> Business Phone *
+                                </label>
+                                {{ form.business_phone(class="form-control", placeholder="Business contact number", required=True) }}
+                                {% for error in form.business_phone.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tax_id" class="form-label">
+                                    <i class="fas fa-id-card"></i> Tax ID (Optional)
+                                </label>
+                                {{ form.tax_id(class="form-control", placeholder="Business tax identification number") }}
+                                {% for error in form.tax_id.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="business_permit" class="form-label">
+                                <i class="fas fa-file-upload"></i> Business Permit *
+                            </label>
+                            {{ form.business_permit(class="form-control") }}
+                            <small class="form-text text-muted">Upload your business permit document (JPG, PNG, or PDF)</small>
+                            {% for error in form.business_permit.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <small><strong>Note:</strong> By submitting this application, you agree to our seller terms and conditions. All information provided will be reviewed by our admin team.</small>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Application
+                            </button>
+                            <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary btn-lg ms-3">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Benefits Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-star"></i> Seller Benefits</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Reach thousands of pet lovers</li>
+                                <li><i class="fas fa-check text-success"></i> Easy product management tools</li>
+                                <li><i class="fas fa-check text-success"></i> Order tracking and management</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Secure payment processing</li>
+                                <li><i class="fas fa-check text-success"></i> Customer review system</li>
+                                <li><i class="fas fa-check text-success"></i> Marketing and promotion support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

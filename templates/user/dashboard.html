@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}My Account - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-light: #D7CCC8;
+    --tan: #EBD5B3;
+    --white: #FFFFFF;
+    --beige-bg: #FAF3E0;
+}
+
+/* Body */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(180deg, var(--beige-bg), #f5e6d3);
+    color: var(--brown-dark);
+    overflow-x: hidden;
+}
+
+/* Container */
+.dashboard-container {
+    max-width: 1200px;
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+    margin: 2rem auto;
+}
+
+/* Headings */
+h5 {
+    color: --white;
+    font-weight: 600;
+}
+
+h2 {
+    color:var(--brown-dark)
+}
+
+/* Text */
+.text-muted {
+    color: #5c4033 !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark));
+    border: none;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(109, 76, 65, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #A1887F, #8D6E63);
+    border: none;
+    color: #fff;
+}
+
+.btn-success:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(109, 76, 65, 0.3);
+}
+
+.btn-secondary {
+    background-color: #BCAAA4;
+    border: none;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #A1887F;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+    transition: all 0.4s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+}
+
+/* Quick Stats Cards */
+.card.bg-primary {
+    background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark)) !important;
+    color: #fff !important;
+}
+
+.card.bg-success {
+    background: linear-gradient(135deg, #A1887F, #8D6E63) !important;
+    color: #fff !important;
+}
+
+.card.bg-primary .btn-light,
+.card.bg-success .btn-light {
+    color: var(--brown-dark);
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+/* Table */
+.table thead th {
+    background-color: var(--brown-light);
+    color: var(--brown-dark);
+    border: none;
+}
+
+.table tbody td {
+    vertical-align: middle;
+}
+
+.badge.bg-warning {
+    background-color: #FFD54F !important;
+    color: var(--brown-dark);
+}
+
+.badge.bg-primary {
+    background-color: var(--brown-primary) !important;
+}
+
+.badge.bg-info {
+    background-color: #D7CCC8 !important;
+    color: var(--brown-dark);
+}
+
+.badge.bg-success {
+    background-color: #8D6E63 !important;
+}
+
+/* Profile Image */
+img.rounded-circle {
+    border: 3px solid var(--brown-light);
+}
+
+/* Footer */
+footer {
+    background: var(--white);
+    color: var(--brown-dark);
+    padding: 1rem 0;
+    text-align: center;
+    margin-top: 2rem;
+}
+</style>
+
+<div class="dashboard-container">
+    <!-- User Info -->
+    <div class="d-flex align-items-center mb-4">
+        {% if user.profile_image %}
+            <img src="{{ user.profile_image|image_url }}" alt="Profile" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+        {% else %}
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                <i class="fas fa-user fa-2x text-white"></i>
+            </div>
+        {% endif %}
+        <div>
+            <h2 class="mb-0">Welcome back, {{ user.first_name }}!</h2>
+            <p class="text-muted mb-0">Manage your account and orders</p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h4>{{ cart_count }}</h4>
+                    <p>Items in Cart</p>
+                    <a href="{{ url_for('user.view_cart') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-shopping-cart"></i> View Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h4>{{ recent_orders|length }}</h4>
+                    <p>Recent Orders</p>
+                    <a href="{{ url_for('user.orders') }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-box"></i> View Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-shopping-bag fa-3x mb-3"></i>
+                    <h5>Browse Products</h5>
+                    <p class="text-muted">Find products for your pets</p>
+                    <a href="{{ url_for('public.browse_products') }}" class="btn btn-primary">Shop Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-handshake fa-3x mb-3"></i>
+                    <h5>Become a Seller</h5>
+                    <p class="text-muted">Start selling pet products</p>
+                    <a href="{{ url_for('user.become_seller') }}" class="btn btn-success">Apply Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-cog fa-3x mb-3 text-secondary"></i>
+                    <h5>Account Settings</h5>
+                    <p class="text-muted">Update your profile</p>
+                    <a href="{{ url_for('user.settings') }}" class="btn btn-secondary">Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    {% if recent_orders %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color: var(--brown-light);">
+                        <h5 class="mb-0"><i class="fas fa-box"></i> Recent Orders</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                        <tr>
+                                            <td>#{{ order.id }}</td>
+                                            <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'warning' if order.status == 'pending' else 'primary' if order.status == 'confirmed' else 'info' if order.status in ['preparing', 'shipped'] else 'success' }}">
+                                                    {{ order.status.replace('_', ' ').title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                <a href="{{ url_for('user.order_detail', order_id=order.id) }}" class="btn btn-sm btn-outline-primary">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end">
+                            <a href="{{ url_for('user.orders') }}" class="btn btn-outline-primary">
+                                View All Orders
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

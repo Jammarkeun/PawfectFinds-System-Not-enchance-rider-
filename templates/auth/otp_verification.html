@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Email Verification - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --brown-dark: #4E342E;
+        --brown-primary: #6D4C41;
+        --brown-light: #D7CCC8;
+        --tan: #EBD5B3;
+        --white: #FFFFFF;
+        --beige-bg: #FAF3E0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--beige-bg);
+        color: var(--brown-dark);
+        overflow-x: hidden;
+    }
+
+    .verification-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        width: 100%;
+    }
+
+    .verification-card {
+        width: 500px;
+        max-width: 95%;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 40px;
+        text-align: center;
+    }
+
+    .verification-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--tan), var(--brown-light));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2rem;
+        color: var(--brown-primary);
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 15px;
+        font-size: 1.2rem;
+        text-align: center;
+        letter-spacing: 0.5rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--brown-primary);
+        box-shadow: 0 0 0 0.2rem rgba(109, 76, 65, 0.25);
+    }
+
+    .btn-primary {
+        background-color: var(--brown-primary);
+        border-color: var(--brown-primary);
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--brown-dark);
+        border-color: var(--brown-dark);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-weight: 600;
+    }
+
+    .countdown {
+        font-size: 1.1rem;
+        color: var(--brown-primary);
+        font-weight: 600;
+    }
+
+    .resend-btn {
+        background: none;
+        border: none;
+        color: var(--brown-primary);
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .resend-btn:hover {
+        color: var(--brown-dark);
+    }
+
+    .resend-btn:disabled {
+        color: #6c757d;
+        cursor: not-allowed;
+        text-decoration: none;
+    }
+</style>
+
+<div class="verification-container">
+    <div class="verification-card">
+        <div class="verification-icon">
+            <i class="fas fa-envelope"></i>
+        </div>
+        
+        <h3 class="mb-3">Verify Your Email</h3>
+        <p class="text-muted mb-4">
+            We've sent a 6-digit verification code to<br>
+            <strong>{{ email }}</strong>
+        </p>
+        
+        <form method="POST" id="otpForm">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-4">
+                <label class="form-label">Enter Verification Code</label>
+                {{ form.otp_code(class="form-control otp-input", placeholder="000000", maxlength="6", id="otpInput") }}
+                {% for error in form.otp_code.errors %}
+                    <div class="text-danger small mt-2">{{ error }}</div>
+                {% endfor %}
+            </div>
+            
+            <div class="mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-check"></i> Verify Email
+                </button>
+            </div>
+            
+            <div class="mb-3">
+                <p class="mb-2">Didn't receive the code?</p>
+                <button type="button" class="resend-btn" id="resendBtn" onclick="resendOTP()">
+                    Resend Code
+                </button>
+                <div class="countdown mt-2" id="countdown" style="display: none;"></div>
+            </div>
+        </form>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Signup
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+let countdownTimer;
+let timeLeft = 60; // 60 seconds cooldown
+
+function startCountdown() {
+    const resendBtn = document.getElementById('resendBtn');
+    const countdown = document.getElementById('countdown');
+    
+    resendBtn.disabled = true;
+    countdown.style.display = 'block';
+    
+    countdownTimer = setInterval(() => {
+        countdown.textContent = `Resend available in ${timeLeft} seconds`;
+        timeLeft--;
+        
+        if (timeLeft < 0) {
+            clearInterval(countdownTimer);
+            resendBtn.disabled = false;
+            countdown.style.display = 'none';
+            timeLeft = 60;
+        }
+    }, 1000);
+}
+
+function resendOTP() {
+    fetch('{{ url_for("auth.resend_otp") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Verification code sent successfully!');
+            startCountdown();
+        } else {
+            alert('Failed to resend code. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+// Auto-format OTP input
+document.getElementById('otpInput').addEventListener('input', function(e) {
+    // Only allow numbers
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    
+    // Auto-submit when 6 digits are entered
+    if (e.target.value.length === 6) {
+        document.getElementById('otpForm').submit();
+    }
+});
+
+// Start countdown on page load
+window.addEventListener('load', startCountdown);
+</script>
+{% endblock %}

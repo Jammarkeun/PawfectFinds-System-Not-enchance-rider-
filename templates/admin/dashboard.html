@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Dashboard - Pawfect Finds{% endblock %}
+
+{% block admin_content %}
+<!-- Header -->
+<header class="dashboard-header">
+    <div>
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+        <p style="color: var(--accent-brown); margin: 5px 0 0 0;">Welcome back, {{ current_user.first_name }}!</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('admin.analytics') }}" class="action-btn">
+            <i class="fas fa-chart-line"></i> View Analytics
+        </a>
+    </div>
+</header>
+
+<!-- Stats Cards -->
+<section class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-value">{{ stats.total_users }}</div>
+        <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-icon"><i class="fas fa-store"></i></div>
+        <div class="stat-value">{{ stats.total_sellers }}</div>
+        <div class="stat-label">Active Sellers</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+        <div class="stat-value">{{ stats.pending_requests }}</div>
+        <div class="stat-label">Pending Requests</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+        <div class="stat-value">{{ stats.total_orders }}</div>
+        <div class="stat-label">Total Orders</div>
+    </div>
+</section>
+
+<!-- Content Grid -->
+<div class="content-grid">
+    <!-- Main Content -->
+    <div class="main-section">
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+            <div class="action-buttons">
+                <a href="{{ url_for('admin.seller_requests') }}" class="action-btn">
+                    <i class="fas fa-handshake"></i> Manage Seller Requests
+                </a>
+                <a href="{{ url_for('admin.manage_users') }}" class="action-btn">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+                <a href="{{ url_for('admin.manage_products') }}" class="action-btn">
+                    <i class="fas fa-box"></i> Manage Products
+                </a>
+                <a href="{{ url_for('admin.manage_orders') }}" class="action-btn">
+                    <i class="fas fa-shopping-cart"></i> Manage Orders
+                </a>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="recent-activity">
+            <h3><i class="fas fa-history"></i> Recent Activity</h3>
+            <ul class="activity-list">
+                {% if recent_requests %}
+                    {% for req in recent_requests[:3] %}
+                    <li class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="title">New seller request from {{ req.first_name }} {{ req.last_name }}</div>
+                            <div class="meta">{{ req.requested_at.strftime('%b %d, %Y') }}</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                {% endif %}
+                {% if recent_users %}
+                    {% for user in recent_users[:2] %}
+                    <li class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="title">New user registered: {{ user.first_name }} {{ user.last_name }}</div>
+                            <div class="meta">{{ user.created_at.strftime('%b %d, %Y') if user.created_at else 'Unknown' }}</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+        </section>
+    </div>
+
+    <!-- Sidebar Widgets -->
+    <div class="sidebar-widgets">
+        <!-- System Status -->
+        <section class="system-status">
+            <h4><i class="fas fa-server"></i> System Status</h4>
+            <div class="status-item">
+                <span class="status-label">Server Status</span>
+                <span class="status-value">Online <span class="status-indicator"></span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Database</span>
+                <span class="status-value">Connected <span class="status-indicator"></span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Pending Orders</span>
+                <span class="status-value">{{ stats.pending_orders|default(0) }}</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Active Sessions</span>
+                <span class="status-value">{{ stats.total_users }}</span>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

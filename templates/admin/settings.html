@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2><i class="fas fa-sliders-h"></i> System Settings</h2>
+          <p class="text-muted">Configure global application options</p>
+        </div>
+        <div>
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'warning' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" action="{{ url_for('admin.system_settings') }}">
+    {{ form.csrf_token }}
+
+    <!-- General Settings -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-cog"></i> General</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Site Name</label>
+            {{ form.site_name(class_='form-control', placeholder='Your marketplace name') }}
+            {% if form.site_name.errors %}
+              <div class="text-danger small">{{ form.site_name.errors[0] }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Support Email</label>
+            {{ form.support_email(class_='form-control', placeholder='support@example.com') }}
+            {% if form.support_email.errors %}
+              <div class="text-danger small">{{ form.support_email.errors[0] }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Default Currency</label>
+            {{ form.default_currency(class_='form-select') }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Timezone</label>
+            {{ form.timezone(class_='form-select') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Security</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              {{ form.require_email_verification(class_='form-check-input') }}
+              <label class="form-check-label">Require Email Verification</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              {{ form.maintenance_mode(class_='form-check-input') }}
+              <label class="form-check-label">Maintenance Mode</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Session Lifetime (minutes)</label>
+            {{ form.session_lifetime(class_='form-control', min='5', max='1440', step='5') }}
+            {% if form.session_lifetime.errors %}
+              <div class="text-danger small">{{ form.session_lifetime.errors[0] }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Max Login Attempts</label>
+            {{ form.max_login_attempts(class_='form-control', min='1', max='10') }}
+            {% if form.max_login_attempts.errors %}
+              <div class="text-danger small">{{ form.max_login_attempts.errors[0] }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payments -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-credit-card"></i> Payments</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              {{ form.enable_cod(class_='form-check-input') }}
+              <label class="form-check-label">Enable Cash on Delivery</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check form-switch">
+              {{ form.enable_card(class_='form-check-input') }}
+              <label class="form-check-label">Enable Card Payments</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Payment Provider</label>
+            {{ form.payment_provider(class_='form-select') }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Provider Public Key</label>
+            {{ form.payment_public_key(class_='form-control', placeholder='pk_live_...') }}
+            {% if form.payment_public_key.errors %}
+              <div class="text-danger small">{{ form.payment_public_key.errors[0] }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="alert alert-warning small mt-3">
+          <i class="fas fa-lock"></i> Secret keys are managed via environment variables and are not shown here for security.
+        </div>
+      </div>
+    </div>
+
+    <!-- Emails -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-envelope"></i> Email</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">SMTP Host</label>
+            {{ form.smtp_host(class_='form-control') }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">SMTP Port</label>
+            {{ form.smtp_port(class_='form-control', min='1', max='65535') }}
+          </div>
+          <div class="col-md-3">
+            <div class="form-check form-switch mt-4">
+              {{ form.smtp_tls(class_='form-check-input') }}
+              <label class="form-check-label">Use TLS</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">From Address</label>
+            {{ form.email_from(class_='form-control') }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email Template Theme</label>
+            {{ form.email_theme(class_='form-select') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+      <a href="{{ url_for('admin.system_settings') }}" class="btn btn-outline-secondary"><i class="fas fa-undo"></i> Reset</a>
+    </div>
+  </form>
+</div>
+
+<style>
+.card-header h5 { display: flex; align-items: center; gap: .5rem; }
+.form-switch .form-check-input { cursor: pointer; }
+</style>
+{% endblock %}

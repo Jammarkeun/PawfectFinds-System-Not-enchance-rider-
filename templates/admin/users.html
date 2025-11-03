@@ -1,0 +1,127 @@
+{% extends "admin/base.html" %}
+
+{% block title %}User Management - Admin Panel{% endblock %}
+
+{% block admin_content %}
+<!-- Header -->
+<header class="dashboard-header">
+    <div>
+        <h1><i class="fas fa-users"></i> User Management</h1>
+        <p style="color: var(--accent-brown); margin: 5px 0 0 0;">Manage all users and their accounts</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('admin.add_user') }}" class="action-btn">
+            <i class="fas fa-user-plus"></i> Add New User
+        </a>
+    </div>
+</header>
+
+<!-- Stats Cards -->
+<section class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-value">{{ total_users }}</div>
+        <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card success">
+        <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+        <div class="stat-value">{{ active_users }}</div>
+        <div class="stat-label">Active Users</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-icon"><i class="fas fa-user-clock"></i></div>
+        <div class="stat-value">{{ inactive_users }}</div>
+        <div class="stat-label">Inactive Users</div>
+    </div>
+    <div class="stat-card info">
+        <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+        <div class="stat-value">{{ admin_users }}</div>
+        <div class="stat-label">Admin Users</div>
+    </div>
+</section>
+
+<!-- Content Grid -->
+<div class="content-grid">
+    <!-- Main Content -->
+    <div class="main-section">
+        <!-- Users Table -->
+        <section class="quick-actions">
+            <h3><i class="fas fa-list"></i> All Users</h3>
+            <div class="card">
+                <div class="card-body">
+                    {% if users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                                            </td>
+                                            <td>{{ user.email }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ user.role.title() }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
+                                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                                </span>
+                                            </td>
+                                            <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</td>
+                                            <td>
+                                                {% if user.is_active %}
+                                                    <button class="btn btn-sm btn-warning deactivate-btn" data-id="{{ user.id }}">
+                                                        <i class="fas fa-ban"></i> Deactivate
+                                                    </button>
+                                                {% else %}
+                                                    <button class="btn btn-sm btn-success activate-btn" data-id="{{ user.id }}">
+                                                        <i class="fas fa-check"></i> Activate
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted"></i>
+                            <h5 class="mt-3 text-muted">No users found</h5>
+                            <p class="text-muted">There are no users in the system yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Sidebar Widgets -->
+    <div class="sidebar-widgets">
+        <!-- Recent Registrations -->
+        <section class="system-status">
+            <h4><i class="fas fa-user-plus"></i> Recent Registrations</h4>
+            {% if recent_users %}
+                {% for user in recent_users[:5] %}
+                <div class="status-item">
+                    <span class="status-label">{{ user.first_name }} {{ user.last_name }}</span>
+                    <span class="status-value">{{ user.created_at.strftime('%m/%d') if user.created_at else 'N/A' }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No recent registrations</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

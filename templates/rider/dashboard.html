@@ -1,0 +1,776 @@
+{% extends "base.html" %}
+
+{% block title %}Rider Dashboard - Pawfect Finds{% endblock %}
+
+{% block head %}
+{{ super() }}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    /* Pawfect Finds Rider Dashboard - Brown Color Palette */
+    body {
+        background-color: #f9f5f0;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .container, .container-fluid {
+        background: #f9f5f0;
+        color: #4e342e;
+        border-radius: 15px;
+        padding: 15px 40px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        margin-top: 20px;
+    }
+
+    h2 {
+        color: #4e342e;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        background-color: #f3e3d3;
+        color: #4e342e;
+        font-weight: 600;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        padding: 15px 20px;
+        border-bottom: 2px solid #e0c9a6;
+    }
+
+    .btn-primary {
+        background-color: #795548;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 22px;
+        font-weight: 600;
+        transition: 0.3s ease;
+        box-shadow: 0 4px 8px rgba(121, 85, 72, 0.3);
+    }
+
+    .btn-primary:hover {
+        background-color: #5d4037;
+        box-shadow: 0 6px 12px rgba(93, 64, 55, 0.4);
+    }
+
+    .bg-primary {
+        background: linear-gradient(135deg, #795548, #5d4037) !important;
+    }
+    .bg-success {
+        background: linear-gradient(135deg, #8d6e63, #6d4c41) !important;
+    }
+    .bg-warning {
+        background: linear-gradient(135deg, #a1887f, #8d6e63) !important;
+    }
+    .bg-info {
+        background: linear-gradient(135deg, #bcaaa4, #a1887f) !important;
+    }
+
+    .order-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #28a745;
+    }
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    #deliveryMap, #navigationMap {
+        min-height: 400px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #connection-status {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rider-dashboard" data-rider-id="{{ rider_id }}">
+    <div id="availableOrdersSection" class="container-fluid" data-rider-id="{{ rider_id }}">
+        
+        <!-- Connection Status Badge -->
+        <span id="connection-status" class="badge bg-secondary">Connecting...</span>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">
+                        <i class="fas fa-motorcycle text-primary"></i> Rider Dashboard
+                    </h2>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-white h-100">
+                    <div class="card-body text-center">
+                        <h4>{{ pending_deliveries or 0 }}</h4>
+                        <p>Pending Deliveries</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body text-center">
+                        <h4>{{ completed_deliveries or 0 }}</h4>
+                        <p>Completed This Month</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body text-center">
+                        <h4>₱{{ "%.2f"|format(monthly_earnings or 0.00) }}</h4>
+                        <p>This Month Earnings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body text-center">
+                        <h4>{{ "%.1f"|format(avg_rating or 0) }}/5</h4>
+                        <p>Average Rating</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Orders Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-box-open me-2"></i> Available Delivery Opportunities</h5>
+                            <button id="refreshOrdersBtn" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Orders Loading State -->
+                        <div id="ordersLoading" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 mb-0">Loading available orders...</p>
+                        </div>
+                        
+                        <!-- No Orders Message -->
+                        <div id="noOrdersMessage" class="text-center py-5" style="display: none;">
+                            <div class="mb-3">
+                                <i class="fas fa-inbox fa-4x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">No Orders Available</h5>
+                            <p class="text-muted mb-0">New delivery opportunities will appear here when available.</p>
+                        </div>
+                        
+                        <!-- Orders Container -->
+                        <div id="availableOrdersContainer" class="p-3" style="display: none;">
+                            <!-- Orders will be inserted here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Card Template -->
+        <template id="orderCardTemplate">
+            <div class="card mb-3 order-card" data-order-id="">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0 fw-bold">Order #<span class="order-number"></span></h6>
+                        <small class="text-muted order-date"></small>
+                    </div>
+                    <div>
+                        <span class="badge bg-success me-2">New</span>
+                        <button class="btn btn-sm btn-primary accept-order-btn">
+                            <i class="fas fa-check-circle me-1"></i> Accept
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-shopping-bag text-primary me-2"></i>
+                                <div>
+                                    <div class="text-muted small">Items</div>
+                                    <div class="fw-bold order-item-count">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-tag text-primary me-2"></i>
+                                <div>
+                                    <div class="text-muted small">Total</div>
+                                    <div class="fw-bold">₱<span class="order-amount">0.00</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                <div>
+                                    <div class="text-muted small">Location</div>
+                                    <div class="fw-bold order-distance">N/A</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <button class="btn btn-sm btn-outline-secondary me-2 view-details-btn">
+                            <i class="fas fa-eye me-1"></i> View Details
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary me-2 view-map-btn" data-order-id="">
+                            <i class="fas fa-map-marked-alt me-1"></i> View on Map
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Order Details Modal -->
+        <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Order #<span id="modalOrderNumber"></span> Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="orderDetailsContent">
+                        <!-- Content will be loaded dynamically -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary accept-order-modal-btn">
+                            <i class="fas fa-check-circle me-1"></i> Accept This Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container for Notifications -->
+        <div id="toastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999"></div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ super() }}
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Socket.IO -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+(function() {
+    'use strict';
+    
+    let socket = null;
+    let riderId = null;
+    let isConnected = false;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const dashboardEl = document.querySelector('.rider-dashboard');
+        const ordersSection = document.getElementById('availableOrdersSection');
+        
+        if (dashboardEl && dashboardEl.dataset.riderId) {
+            riderId = dashboardEl.dataset.riderId;
+        } else if (ordersSection && ordersSection.dataset.riderId) {
+            riderId = ordersSection.dataset.riderId;
+        }
+        
+        if (!riderId) {
+            console.error('❌ Rider ID not found!');
+            return;
+        }
+        
+        initializeWebSocket();
+        loadAvailableOrders();
+        setupEventHandlers();
+        setInterval(loadAvailableOrders, 60000);
+    });
+    
+    function initializeWebSocket() {
+        if (typeof io === 'undefined') {
+            console.error('❌ Socket.IO not loaded!');
+            return;
+        }
+        
+        try {
+            socket = io({
+                reconnection: true,
+                reconnectionAttempts: 10,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                timeout: 20000,
+                transports: ['websocket', 'polling']
+            });
+            
+            socket.on('connect', function() {
+                isConnected = true;
+                socket.emit('rider_online', { rider_id: riderId });
+                socket.emit('join', { room: 'rider_' + riderId });
+                socket.emit('join', { room: 'available_orders' });
+                socket.emit('join', { room: 'riders_room' });
+                updateConnectionStatus(true);
+            });
+            
+            socket.on('new_delivery_opportunity', handleNewOrder);
+            socket.on('new_available_order', handleNewOrder);
+            socket.on('new_order_confirmed', handleNewOrder);
+            socket.on('new_delivery_available', handleNewOrder);
+            
+            socket.on('order_taken', function(data) {
+                removeOrderCard(data.order_id || data.orderId);
+            });
+            
+            socket.on('disconnect', function() {
+                isConnected = false;
+                updateConnectionStatus(false);
+            });
+            
+            socket.on('connect_error', function() {
+                updateConnectionStatus(false);
+            });
+            
+            socket.on('reconnect', function() {
+                isConnected = true;
+                updateConnectionStatus(true);
+                socket.emit('rider_online', { rider_id: riderId });
+                socket.emit('join', { room: 'rider_' + riderId });
+                socket.emit('join', { room: 'available_orders' });
+                socket.emit('join', { room: 'riders_room' });
+                loadAvailableOrders();
+            });
+            
+        } catch (error) {
+            console.error('❌ WebSocket initialization error:', error);
+        }
+    }
+    
+    function loadAvailableOrders() {
+        const loadingEl = document.getElementById('ordersLoading');
+        const noOrdersEl = document.getElementById('noOrdersMessage');
+        const container = document.getElementById('availableOrdersContainer');
+        
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (noOrdersEl) noOrdersEl.style.display = 'none';
+        if (container) container.style.display = 'none';
+        
+        fetch('/rider/available-orders', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Server returned ' + response.status);
+            return response.json();
+        })
+        .then(data => {
+            if (loadingEl) loadingEl.style.display = 'none';
+            
+            let orders = [];
+            if (data.success && Array.isArray(data.orders)) {
+                orders = data.orders;
+            } else if (Array.isArray(data)) {
+                orders = data;
+            }
+            
+            if (orders.length > 0) {
+                if (container) {
+                    container.innerHTML = '';
+                    container.style.display = 'block';
+                }
+                if (noOrdersEl) noOrdersEl.style.display = 'none';
+                orders.forEach(order => addOrderCard(order));
+            } else {
+                if (container) container.style.display = 'none';
+                if (noOrdersEl) noOrdersEl.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (noOrdersEl) {
+                noOrdersEl.style.display = 'block';
+                noOrdersEl.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+                        <h5 class="text-danger mb-2">Failed to Load Orders</h5>
+                        <p class="text-muted mb-4">${error.message}</p>
+                        <button id="retryLoadBtn" class="btn btn-primary">
+                            <i class="fas fa-sync-alt me-2"></i> Try Again
+                        </button>
+                    </div>
+                `;
+                document.getElementById('retryLoadBtn').addEventListener('click', loadAvailableOrders);
+            }
+        });
+    }
+    
+    function addOrderCard(order) {
+        const container = document.getElementById('availableOrdersContainer');
+        const template = document.getElementById('orderCardTemplate');
+        
+        if (!container || !template) return;
+        
+        const orderId = order.id || order.order_id;
+        if (document.getElementById('order-' + orderId)) return;
+        
+        const clone = template.content.cloneNode(true);
+        const card = clone.querySelector('.order-card');
+        card.setAttribute('data-order-id', orderId);
+        card.id = 'order-' + orderId;
+        
+        clone.querySelector('.order-number').textContent = order.order_number || 'ORD-' + String(orderId).padStart(5, '0');
+        clone.querySelector('.order-date').textContent = formatDate(order.created_at);
+        clone.querySelector('.order-item-count').textContent = order.item_count || 0;
+        clone.querySelector('.order-amount').textContent = parseFloat(order.total_amount || 0).toFixed(2);
+        
+        const address = order.shipping_address || 'Address not specified';
+        clone.querySelector('.order-distance').textContent = address.length > 30 ? address.substring(0, 30) + '...' : address;
+        clone.querySelector('.order-distance').title = address;
+        
+        const acceptBtn = clone.querySelector('.accept-order-btn');
+        if (acceptBtn) {
+            acceptBtn.addEventListener('click', () => acceptOrder(orderId));
+        }
+
+        const detailsBtn = clone.querySelector('.view-details-btn');
+        if (detailsBtn) {
+            detailsBtn.addEventListener('click', () => viewOrderDetails(orderId));
+        }
+
+        const mapBtn = clone.querySelector('.view-map-btn');
+        if (mapBtn) {
+            mapBtn.setAttribute('data-order-id', orderId);
+            mapBtn.addEventListener('click', () => viewOrderOnMap(orderId));
+        }
+        
+        container.insertBefore(clone, container.firstChild);
+    }
+    
+    function handleNewOrder(data) {
+        const order = data.order || data;
+        if (!order || (!order.id && !order.order_id)) return;
+        
+        const container = document.getElementById('availableOrdersContainer');
+        const noOrdersEl = document.getElementById('noOrdersMessage');
+        if (container) container.style.display = 'block';
+        if (noOrdersEl) noOrdersEl.style.display = 'none';
+        
+        addOrderCard(order);
+        const orderNum = order.order_number || 'ORD-' + (order.id || order.order_id);
+        showToast('New Order Available!', `${orderNum} is ready for delivery`, 'success');
+        playNotificationSound();
+    }
+    
+    window.acceptOrder = function(orderId) {
+        if (!confirm('Accept this delivery? You will be assigned to deliver this order.')) return;
+        
+        const card = document.getElementById('order-' + orderId);
+        const btn = card?.querySelector('.accept-order-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Accepting...';
+        }
+        
+        const formData = new FormData();
+        formData.append('order_id', orderId);
+        
+        fetch('/rider/delivery/accept', {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Success!', 'Delivery accepted successfully', 'success');
+                removeOrderCard(orderId);
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                throw new Error(data.message || 'Failed to accept delivery');
+            }
+        })
+        .catch(error => {
+            showToast('Failed', error.message || 'Could not accept delivery', 'danger');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Accept';
+            }
+        });
+    };
+    
+    window.viewOrderDetails = function(orderId) {
+        const modal = document.getElementById('orderDetailsModal');
+        const modalNumber = document.getElementById('modalOrderNumber');
+        const modalContent = document.getElementById('orderDetailsContent');
+        
+        if (!modal || !modalContent) return;
+        
+        if (modalNumber) modalNumber.textContent = orderId;
+        modalContent.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Loading details...</p></div>';
+        
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        fetch(`/rider/order/${orderId}/details`, { credentials: 'same-origin' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.html) {
+                modalContent.innerHTML = data.html;
+                
+                // Add Leaflet map
+                const addressEl = modalContent.querySelector('.shipping-address');
+                if (addressEl) {
+                    const fullAddress = addressEl.textContent.trim();
+                    const mapDiv = document.createElement('div');
+                    mapDiv.id = 'modalMap';
+                    mapDiv.style.height = '250px';
+                    mapDiv.style.marginTop = '15px';
+                    mapDiv.style.borderRadius = '8px';
+                    mapDiv.style.border = '1px solid #ddd';
+                    addressEl.parentElement.appendChild(mapDiv);
+
+                    const map = L.map('modalMap').setView([14.5995, 120.9842], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+
+                    // Geocode the address to get coordinates
+                    geocodeAddress(fullAddress).then(coords => {
+                        if (coords) {
+                            map.setView(coords, 15);
+                            L.marker(coords).addTo(map).bindPopup(fullAddress).openPopup();
+                        } else {
+                            // Fallback to default location
+                            L.marker([14.5995, 120.9842]).addTo(map).bindPopup(fullAddress).openPopup();
+                        }
+                    }).catch(() => {
+                        L.marker([14.5995, 120.9842]).addTo(map).bindPopup(fullAddress).openPopup();
+                    });
+                }
+                
+                const acceptBtn = modal.querySelector('.accept-order-modal-btn');
+                if (acceptBtn) {
+                    acceptBtn.addEventListener('click', () => {
+                        bsModal.hide();
+                        acceptOrder(orderId);
+                    });
+                }
+            } else {
+                modalContent.innerHTML = `<div class="alert alert-danger">${data.message || 'Failed to load order details'}</div>`;
+            }
+        })
+        .catch(error => {
+            modalContent.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+        });
+    };
+    
+    function removeOrderCard(orderId) {
+        const card = document.getElementById('order-' + orderId);
+        if (card) {
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.remove();
+                const container = document.getElementById('availableOrdersContainer');
+                const noOrdersEl = document.getElementById('noOrdersMessage');
+                if (container && container.children.length === 0) {
+                    container.style.display = 'none';
+                    if (noOrdersEl) noOrdersEl.style.display = 'block';
+                }
+            }, 300);
+        }
+    }
+    
+    function setupEventHandlers() {
+        const refreshBtn = document.getElementById('refreshOrdersBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Refreshing...';
+                loadAvailableOrders();
+                setTimeout(() => {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Refresh';
+                }, 1000);
+            });
+        }
+    }
+    
+    function updateConnectionStatus(connected) {
+        const statusEl = document.getElementById('connection-status');
+        if (statusEl) {
+            statusEl.textContent = connected ? 'Online' : 'Offline';
+            statusEl.className = `badge bg-${connected ? 'success' : 'danger'}`;
+        }
+    }
+    
+    function showToast(title, message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer') || document.body;
+        const bgClass = { 'success': 'bg-success', 'danger': 'bg-danger', 'warning': 'bg-warning', 'info': 'bg-info' }[type] || 'bg-info';
+        const toastId = 'toast-' + Date.now();
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <strong>${title}</strong><br>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+        toast.show();
+        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+    }
+    
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMins = Math.floor((now - date) / 60000);
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return diffMins + ' min ago';
+            if (diffMins < 1440) return Math.floor(diffMins / 60) + ' hours ago';
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+            return dateString;
+        }
+    }
+    
+    function playNotificationSound() {
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDbF7+ijWxYNTqzj67RkFAw5jd7v1nggCjWH2fPCbikHMIzf+b==');
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+        } catch (e) {}
+    }
+
+    async function geocodeAddress(address) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data && data.length > 0) {
+                return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+            }
+        } catch (error) {
+            console.error('Geocoding error:', error);
+        }
+        return null;
+    }
+
+    async function viewOrderOnMap(orderId) {
+        // Create or show map modal
+        let mapModal = document.getElementById('mapModal');
+        if (!mapModal) {
+            mapModal = document.createElement('div');
+            mapModal.className = 'modal fade';
+            mapModal.id = 'mapModal';
+            mapModal.setAttribute('tabindex', '-1');
+            mapModal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Order Location</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="orderMap" style="height: 400px; width: 100%;"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(mapModal);
+        }
+
+        const bsModal = new bootstrap.Modal(mapModal);
+        bsModal.show();
+
+        // Get order details to get address
+        fetch(`/rider/order/${orderId}/details`, { credentials: 'same-origin' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.html) {
+                // Extract address from HTML (simple parsing)
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data.html;
+                const addressEl = tempDiv.querySelector('.shipping-address');
+                const address = addressEl ? addressEl.textContent.trim() : 'Manila, Philippines';
+
+                // Initialize map
+                const map = L.map('orderMap').setView([14.5995, 120.9842], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Geocode and show location
+                geocodeAddress(address).then(coords => {
+                    if (coords) {
+                        map.setView(coords, 15);
+                        L.marker(coords).addTo(map)
+                            .bindPopup(`<b>Delivery Address:</b><br>${address}`)
+                            .openPopup();
+                    } else {
+                        L.marker([14.5995, 120.9842]).addTo(map)
+                            .bindPopup(`<b>Delivery Address:</b><br>${address}`)
+                            .openPopup();
+                        showToast('Could not locate exact address, showing default location', 'warning');
+                    }
+                }).catch(() => {
+                    L.marker([14.5995, 120.9842]).addTo(map)
+                        .bindPopup(`<b>Delivery Address:</b><br>${address}`)
+                        .openPopup();
+                    showToast('Could not locate exact address, showing default location', 'warning');
+                });
+            } else {
+                showToast('Failed to load order details for map', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading order for map:', error);
+            showToast('Failed to load order location', 'danger');
+        });
+    }
+})();
+</script>
+{% endblock %}

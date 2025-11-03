@@ -1,0 +1,815 @@
+{% extends "seller/seller_base.html" %}
+
+{% block title %}Seller Dashboard - Pawfect Finds{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Base styles for better visibility */
+    body {
+        color: #2d3748;
+        background-color: #f7fafc;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1.5rem;
+        background-color: #fff;
+    }
+    
+    .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+    
+    .card-header h6 {
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+        font-size: 1rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem 1.5rem;
+        color: #4a5568;
+    }
+    
+    /* Improve text contrast */
+    .text-gray-800 {
+        color: #2d3748 !important;
+    }
+    
+    .text-muted {
+        color: #718096 !important;
+    }
+    
+    /* Chart containers */
+    .chart-area, .chart-pie {
+        position: relative;
+        height: 20rem;
+        width: 100%;
+    }
+    
+    /* Table styles */
+    .table {
+        color: #2d3748;
+        font-size: 0.875rem;
+    }
+    
+    .table th {
+        background-color: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        color: #4a5568;
+    }
+    
+    .table td {
+        border-color: #edf2f7;
+        vertical-align: middle;
+    }
+    
+    /* Progress bars */
+    .progress {
+        height: 0.5rem;
+        background-color: #edf2f7;
+        border-radius: 0.25rem;
+    }
+    
+    /* Status badges */
+    .badge {
+        font-weight: 600;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+    }
+    
+    /* Buttons */
+    .btn {
+        font-weight: 500;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1rem;
+        }
+        .chart-area, .chart-pie {
+            height: 16rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block seller_content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <div>
+            <a href="{{ url_for('seller.analytics') }}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-chart-line"></i> View Full Analytics
+            </a>
+            <button class="d-none d-sm-inline-block btn btn-primary shadow-sm export-pdf-btn">
+                <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row">
+        <!-- Total Revenue -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₱{{ "%.2f"|format(order_stats.total_revenue|default(0)) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order_stats.total_orders|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Products -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Active Products</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ product_stats.active_products|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Orders -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order_stats.pending_orders|default(0) }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Revenue Trends -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold" style="color:rgb(255, 255, 255) !important;">Revenue Trend (12 Months)</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="chart-area" style="position: relative; height: 300px; width: 100%; background-color: #ffffff; border-radius: 0.35rem;">
+                        <canvas id="salesChart" style="display: block; width: 100%; height: 100%;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Status -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color:rgb(255, 255, 255) !important;">Order Status</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="chart-pie" style="position: relative; height: 250px; width: 100%; background-color: #ffffff; border-radius: 0.35rem;">
+                        <canvas id="orderStatusChart" style="display: block; width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small px-4" id="orderStatusLegend">
+                        <!-- Legend will be inserted here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color:rgb(255, 255, 255) !important;">Recent Orders</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="recentOrdersTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.customer_name }}</td>
+                                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                                    <td>{{ order.items_count }}</td>
+                                    <td>₱{{ "%.2f"|format(order.total_amount) }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' if order.status == 'processing' else 'info' }}">
+                                            {{ order.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary view-order-btn" data-order-id="{{ order.id }}">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No orders found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Selling Products & Top Customers -->
+    <div class="row">
+        <!-- Top Selling Products -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color:rgb(255, 255, 255) !important;">Top Selling Products</h6>
+                </div>
+                <div class="card-body">
+                    {% if top_products %}
+                        {% for product in top_products|sort(attribute='total_sold', reverse=True) %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="font-weight-bold">{{ product.name }}</span>
+                                <span class="text-muted small">{{ product.total_sold }} sold</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-{{ ['primary', 'success', 'info', 'warning', 'danger'][loop.index0 % 5] }}"
+                                    role="progressbar" 
+                                    style="width: {{ (product.total_sold / (top_products[0].total_sold or 1)) * 100 }}%"
+                                    aria-valuenow="{{ product.total_sold }}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">₱{{ "%.2f"|format(product.price|float) }} each</small>
+                                <small class="font-weight-bold">₱{{ "%.2f"|format((product.total_sold * product.price)|float) }} total</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No sales data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Customers -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color:rgb(255, 255, 255) !important;">Top Customers</h6>
+                </div>
+                <div class="card-body">
+                    {% if top_customers %}
+                        {% for customer in top_customers %}
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user text-muted" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="ms-3 flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-0">{{ customer.first_name }} {{ customer.last_name }}</h6>
+                                    <span class="badge bg-primary">{{ customer.order_count }} orders</span>
+                                </div>
+                                <div class="text-muted small">{{ customer.email }}</div>
+                                <div class="mt-1">
+                                    <span class="text-primary font-weight-bold">₱{{ "%.2f"|format(customer.total_spent|float) }}</span>
+                                    <span class="text-muted small">total spent</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No customer data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for status updates -->
+<form id="statusUpdateForm" action="{{ url_for('seller.update_order_status') }}" method="POST" class="d-none">
+    <input type="hidden" name="order_id" id="orderIdInput">
+    <input type="hidden" name="status" id="statusInput">
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<!-- PDF Export Script -->
+<script src="{{ url_for('static', filename='js/pdf-export.js') }}" defer></script>
+
+<script>
+// Initialize charts when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart');
+    if (salesCtx) {
+        new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: {{ sales_labels|tojson|safe }},
+                datasets: [{
+                    label: 'Sales',
+                    data: {{ sales_amounts|tojson|safe }},
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₱' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Order Status Chart
+    const orderStatusCtx = document.getElementById('orderStatusChart');
+    if (orderStatusCtx) {
+        new Chart(orderStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ order_status_breakdown|map(attribute='status')|list|tojson|safe }},
+                datasets: [{
+                    data: {{ order_status_breakdown|map(attribute='count')|list|tojson|safe }},
+                    backgroundColor: [
+                        '#4e73df',
+                        '#1cc88a',
+                        '#36b9cc',
+                        '#f6c23e',
+                        '#e74a3b'
+                    ],
+                    hoverBackgroundColor: [
+                        '#2e59d9',
+                        '#17a673',
+                        '#2c9faf',
+                        '#dda20a',
+                        '#be2617'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+                        cells[0].textContent.trim(),
+                        cells[1].textContent.trim(),
+                        cells[2].textContent.trim(),
+                        cells[3].textContent.trim(),
+                        cells[4].textContent.trim()
+                    ]);
+                }
+            });
+            
+            // Add table if we have data
+            if (orders.length > 0) {
+                try {
+                    doc.autoTable({
+                        head: [['Order ID', 'Customer', 'Date', 'Items', 'Total']],
+                        body: orders,
+                        startY: chartCanvas ? 140 : 40,
+                        headStyles: {
+                            fillColor: [78, 115, 223],
+                            textColor: 255,
+                            fontStyle: 'bold'
+                        },
+                        styles: {
+                            cellPadding: 3,
+                            fontSize: 10,
+                            valign: 'middle',
+                            overflow: 'linebreak'
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 25 },
+                            1: { cellWidth: 40 },
+                            2: { cellWidth: 30 },
+                            3: { cellWidth: 20 },
+                            4: { cellWidth: 25 }
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error generating table in PDF:', e);
+                    doc.text('Error generating order table', 14, chartCanvas ? 150 : 40);
+                }
+            } else {
+                doc.text('No order data available', 14, chartCanvas ? 150 : 40);
+            }
+        } else {
+            doc.text('Order table not found', 14, chartCanvas ? 150 : 40);
+        }
+        
+        // Add footer with page numbers
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text(
+                'Page ' + i + ' of ' + pageCount,
+                doc.internal.pageSize.width / 2,
+                doc.internal.pageSize.height - 10,
+                { align: 'center' }
+            );
+        }
+
+        // Save the PDF
+        doc.save('sales-report-' + new Date().toISOString().split('T')[0] + '.pdf');
+        
+    } catch (error) {
+        console.error('Error in exportToPDF:', error);
+        alert('Error generating PDF: ' + error.message);
+    }
+};
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.view-order-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            window.location.href = `/seller/order/${orderId}`;
+        });
+    });
+});
+function updateOrderStatus(orderId, status) {
+    if (confirm('Are you sure you want to update this order status?')) {
+        const form = document.getElementById('statusUpdateForm');
+        document.getElementById('orderIdInput').value = orderId;
+        document.getElementById('statusInput').value = status;
+        form.submit();
+    }
+}
+
+// Initialize charts when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing charts...');
+    
+    // Chart colors - using light colors for better visibility on dark background
+    const primaryColor = '#FFFFFF';  // White for main lines and text
+    const secondaryColor = '#FFD700'; // Gold for accents
+    const accentColor = '#00BFFF';   // Light blue for highlights
+    const gridColor = 'rgba(255, 255, 255, 0.1)'; // Subtle grid lines
+    const textColor = '#FFFFFF';     // White text
+    const areaFill = 'rgba(255, 255, 255, 0.1)';  // Semi-transparent fill
+
+    // Sales Trend Chart
+    const salesData = {
+        labels: {{ sales_labels|tojson|safe }},
+        datasets: [{
+            label: 'Sales (₱)',
+            data: {{ sales_amounts|tojson|safe }},
+            backgroundColor: backgroundBrown + '80', // Add transparency
+            borderColor: primaryBrown,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: primaryBrown,
+            pointHoverBackgroundColor: primaryBrown,
+            pointHoverBorderColor: '#fff',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+        }]
+    };
+    
+    // Initialize Sales Chart
+    const salesCtx = document.getElementById('salesChart');
+    if (salesCtx) {
+        try {
+            // Ensure we have valid data
+            const salesLabels = {{ sales_labels|tojson|safe }} || [];
+            const salesAmounts = {{ sales_amounts|tojson|safe }} || [];
+            
+            console.log('Sales Labels:', salesLabels);
+            console.log('Sales Amounts:', salesAmounts);
+            
+            if (salesLabels.length === 0 || salesAmounts.length === 0) {
+                console.warn('No sales data available');
+                salesCtx.parentElement.innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="fas fa-chart-line fa-3x mb-2"></i>
+                        <p>No sales data available</p>
+                    </div>`;
+                return;
+            }
+            
+            const salesData = {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Sales (₱)',
+                    data: salesAmounts,
+                    backgroundColor: areaFill,
+                    borderColor: secondaryColor,
+                    pointBackgroundColor: primaryColor,
+                    pointBorderColor: secondaryColor,
+                    pointHoverBackgroundColor: secondaryColor,
+                    pointHoverBorderColor: primaryColor,
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            };
+
+            new Chart(salesCtx, {
+                type: 'line',
+                data: salesData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            titleColor: '#5a5c69',
+                            bodyColor: '#858796',
+                            borderColor: '#dddfeb',
+                            borderWidth: 1,
+                            padding: 15,
+                            displayColors: false,
+                            intersect: false,
+                            mode: 'index',
+                            caretPadding: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    return '₱' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { 
+                                color: 'rgba(255, 255, 255, 0.2)', // Lighter grid lines
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#fff', // White text
+                                maxRotation: 0,
+                                maxTicksLimit: 6,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.2)', // Lighter grid lines
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#fff', // White text
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing sales chart:', error);
+            salesCtx.parentElement.innerHTML = `
+                <div class="text-center p-4">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>Error loading chart data</p>
+                </div>`;
+        }
+    }
+
+    // Initialize Order Status Chart
+    const orderStatusCtx = document.getElementById('orderStatusChart');
+    if (orderStatusCtx) {
+        try {
+            const statusData = {{ order_status_breakdown|tojson|safe }} || [];
+            
+            console.log('Order Status Data:', statusData);
+            
+            if (statusData.length === 0) {
+                console.warn('No order status data available');
+                orderStatusCtx.parentElement.innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="fas fa-chart-pie fa-3x mb-2"></i>
+                        <p>No order data available</p>
+                    </div>`;
+                return;
+            }
+            
+            // Ensure we have data to display
+            if (!statusData || statusData.length === 0) {
+                statusData = [{status: 'No data', count: 1}];
+            }
+
+            const orderStatusData = {
+                labels: statusData.map(item => item.status || 'Unknown'),
+                datasets: [{
+                    data: statusData.map(item => item.count || 0),
+                    backgroundColor: [
+                        '#FFD700', // Gold
+                        '#00BFFF', // Light Blue
+                        '#FF6B6B', // Light Red
+                        '#7ED957', // Light Green
+                        '#FFA500', // Orange
+                        '#9370DB'  // Medium Purple
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#fff',
+                    hoverOffset: 10
+                }]
+            };
+            
+            new Chart(orderStatusCtx, {
+                type: 'doughnut',
+                data: orderStatusData,
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                color: '#4a4a4a',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            titleColor: '#5a5c69',
+                            bodyColor: '#858796',
+                            borderColor: '#dddfeb',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error initializing order status chart:', error);
+            // Show error message in the chart container
+            orderStatusCtx.parentElement.innerHTML = `
+                <div class="text-center p-4 text-muted">
+                    <i class="fas fa-chart-pie fa-3x mb-2"></i>
+                    <p>Unable to load chart data</p>
+                </div>
+            `;
+        }
+    }
+
+    // Create chart
+    new Chart(ctx, {
+        type: 'line',
+        data: salesData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'white',
+                    titleColor: '#5a5c69',
+                    bodyColor: '#858796',
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    padding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(context) {
+                            return '₱' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: {
+                        maxTicksLimit: 6,
+                        maxRotation: 0,
+                        minRotation: 0,
+                        padding: 10,
+                        color: '#858796'
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        padding: 10,
+                        callback: function(value) {
+                            return '₱' + value.toLocaleString();
+                        },
+                        color: '#858796'
+                    }
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

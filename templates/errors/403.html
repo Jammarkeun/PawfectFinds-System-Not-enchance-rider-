@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Access Forbidden - Pawfect Finds{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row min-vh-100 align-items-center">
+        <div class="col-lg-8 mx-auto text-center">
+            <!-- Error Illustration -->
+            <div class="mb-5">
+                <i class="fas fa-lock fa-5x text-muted mb-4"></i>
+                <div class="position-relative d-inline-block">
+                    <h1 class="display-1 text-danger fw-bold">403</h1>
+                    <div class="position-absolute top-0 start-100 translate-middle">
+                        <i class="fas fa-shield-alt fa-3x text-warning" style="transform: rotate(15deg);"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="mb-5">
+                <h2 class="h3 mb-3">Access Forbidden - Security Check Failed</h2>
+                <p class="lead text-muted mb-4">
+                    It looks like there was an issue with your request security token. This could happen if your session expired or if there's a form submission problem.
+                    Don't worry, we can fix this quickly!
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-home"></i> Go Home
+                        </a>
+                        <button onclick="window.location.reload()" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-refresh"></i> Refresh Page
+                        </button>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-sign-in-alt"></i> Login Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-6">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h5 class="mb-3">
+                                <i class="fas fa-question-circle text-primary"></i>
+                                What happened?
+                            </h5>
+                            <p class="small mb-0">
+                                This error occurs when our security system detects an invalid or missing CSRF token.
+                                Try refreshing the page or logging in again. If the problem persists, please contact support.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tips -->
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <h5 class="mb-4 text-muted">Security Tips</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4 col-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                                    <h6 class="mb-0">Session Timeout</h6>
+                                    <small class="text-muted">Sessions expire after inactivity</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-refresh fa-2x text-success mb-2"></i>
+                                    <h6 class="mb-0">Refresh Page</h6>
+                                    <small class="text-muted">Try reloading to get a new token</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-shield-alt fa-2x text-warning mb-2"></i>
+                                    <h6 class="mb-0">Stay Secure</h6>
+                                    <small class="text-muted">Our security protects your data</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Support Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <h4 class="mb-4">
+                    <i class="fas fa-headset text-primary"></i>
+                    Need Help?
+                </h4>
+                <p class="mb-4">
+                    If you're still having trouble accessing the site, our support team is here to help!
+                </p>
+                <a href="{{ url_for('public.contact') }}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}

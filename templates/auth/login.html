@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --brown-dark: #4E342E;
+        --brown-primary: #6D4C41;
+        --brown-light: #D7CCC8;
+        --tan: #EBD5B3;
+        --white: #FFFFFF;
+        --beige-bg: #FAF3E0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(180deg, var(--beige-bg), #f5e6d3);
+        color: var(--brown-dark);
+        overflow-x: hidden;
+    }
+
+    /* 🧱 Layout */
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 90vh;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* 🌿 Floating background pattern */
+    .login-container::before {
+        content: "";
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle at center, rgba(109, 76, 65, 0.1), transparent 70%);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite alternate;
+    }
+
+    .login-container::after {
+        content: "";
+        position: absolute;
+        bottom: -120px;
+        left: -100px;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle at center, rgba(235, 213, 179, 0.2), transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes float {
+        from { transform: translateY(0px); }
+        to { transform: translateY(20px); }
+    }
+
+    .login-card {
+        display: flex;
+        flex-direction: row;
+        width: 950px;
+        max-width: 95%;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .login-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 45px rgba(0,0,0,0.15);
+    }
+
+    /* 🐾 LEFT LOGO SECTION */
+    .login-logo-section {
+        flex: 1;
+        background: linear-gradient(135deg, var(--tan), var(--brown-light));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        padding: 40px;
+        position: relative;
+    }
+
+    /* ✨ Soft texture overlay */
+    .login-logo-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url('https://www.transparenttextures.com/patterns/white-diamond.png');
+        opacity: 0.2;
+        pointer-events: none;
+    }
+
+    .login-logo-section img {
+        max-width: 250px;
+        width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.25));
+        transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .login-logo-section img:hover {
+        transform: scale(1.05);
+        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+    }
+
+    .login-logo-section h3 {
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--brown-dark);
+        margin-bottom: 6px;
+    }
+
+    .login-logo-section p {
+        font-size: 0.95rem;
+        color: #5c4033;
+        opacity: 0.9;
+    }
+
+    /* 🧾 RIGHT FORM SECTION */
+    .login-form-section {
+        flex: 1;
+        padding: 60px 50px;
+        background: linear-gradient(135deg, var(--white), #fffaf6);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-form-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle at top right, rgba(109, 76, 65, 0.05), transparent 70%);
+        z-index: -1;
+    }
+
+    .login-form-section h4 {
+        color: var(--brown-primary);
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 1.6rem;
+    }
+
+    .login-form-section p {
+        color: #7a6252;
+        margin-bottom: 30px;
+        font-size: 0.95rem;
+    }
+
+    /* ✏️ Form Styles */
+    .form-label {
+        font-weight: 500;
+        color: var(--brown-dark);
+    }
+
+    .form-control {
+        border: 1px solid #d8c2b2;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #fff;
+    }
+
+    .form-control:focus {
+        border-color: var(--brown-primary);
+        box-shadow: 0 0 8px rgba(109, 76, 65, 0.25);
+        transform: scale(1.01);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark));
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+        color: #fff;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(109, 76, 65, 0.3);
+    }
+
+    .text-primary {
+        color: var(--brown-primary) !important;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .text-primary:hover {
+        color: var(--brown-dark) !important;
+        text-decoration: underline;
+    }
+
+    .btn-outline-secondary {
+        border: none;
+        background: transparent;
+        color: var(--brown-primary);
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        color: var(--brown-dark);
+        transform: scale(1.1);
+    }
+
+    /* 📱 Responsive */
+    @media (max-width: 768px) {
+        .login-card {
+            flex-direction: column;
+            border-radius: 15px;
+        }
+
+        .login-logo-section {
+            padding: 30px;
+        }
+
+        .login-logo-section img {
+            max-width: 180px;
+        }
+
+        .login-form-section {
+            padding: 30px 25px;
+        }
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-card shadow">
+        <!-- 🐾 LEFT LOGO SECTION -->
+        <div class="login-logo-section">
+            <!-- ✅ Simplified image path -->
+            <img src="{{ url_for('static', filename='PF-logo.png') }}" alt="Pawfect Finds Logo">
+            <h3>Pawfect Finds</h3>
+            <p>Your one-stop shop for pet essentials</p>
+        </div>
+
+        <!-- 🧾 RIGHT FORM SECTION -->
+        <div class="login-form-section">
+            <h4><i class="fas fa-paw"></i> Welcome Back</h4>
+            <p>Sign in to manage your account and continue your Pawfect Finds journey.</p>
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    {{ form.email(class="form-control", placeholder="Enter your email", id="email") }}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <div class="input-group">
+                        {{ form.password(class="form-control", placeholder="Enter your password", id="password") }}
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="fas fa-eye" id="passwordIcon"></i>
+                        </button>
+                    </div>
+                    {% for error in form.password.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                {{ form.submit(class="btn btn-primary mb-3") }}
+
+                <div class="text-center mt-3">
+                    <p class="mb-0">Don’t have an account? 
+                        <a href="{{ url_for('auth.signup') }}" class="text-primary">Sign up here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+    const passwordIcon = document.getElementById('passwordIcon');
+
+    toggleBtn.addEventListener('click', () => {
+        const type = passwordField.type === 'password' ? 'text' : 'password';
+        passwordField.type = type;
+        passwordIcon.classList.toggle('fa-eye');
+        passwordIcon.classList.toggle('fa-eye-slash');
+    });
+</script>
+{% endblock %}

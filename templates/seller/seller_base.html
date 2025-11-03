@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if current_user %}
+    <body class="seller-dashboard" data-seller-id="{{ current_user.id }}">
+{% else %}
+    <body class="seller-dashboard">
+{% endif %}
+<style>
+/* ============================
+   SELLER DASHBOARD UI
+   Professional Design with Blue Theme
+=============================== */
+
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-medium: #795548;
+    --brown-light: #D7CCC8;
+    --tan: #EBD5B3;
+    --beige-bg: #FAF3E0;
+    --white: #fff;
+    
+    /* Theme compatibility */
+    --primary: var(--brown-primary);
+    --secondary: var(--brown-dark);
+    --light: var(--tan);
+    --accent: var(--brown-medium);
+    --dark: var(--brown-dark);
+    --success: #4caf50;
+    --info: #2196f3;
+    --warning: #ff9800;
+    --danger: #f44336;
+    --bg-color: var(--beige-bg);
+    --card-shadow: 0 4px 20px rgba(109, 76, 65, 0.1);
+    --card-shadow-hover: 0 8px 30px rgba(109, 76, 65, 0.15);
+}
+
+body {
+    background: linear-gradient(180deg, var(--beige-bg), #faede2);
+    font-family: 'Poppins', sans-serif;
+    color: var(--brown-dark);
+    margin: 0;
+    padding: 0;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Floating gradient bubbles */
+body::before, body::after {
+    content: "";
+    position: fixed;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(93, 64, 55, 0.1), transparent 70%);
+    z-index: 0;
+    filter: blur(40px);
+    pointer-events: none;
+}
+body::before {
+    top: -150px;
+    right: -100px;
+    animation: float1 6s ease-in-out infinite alternate;
+}
+body::after {
+    bottom: -120px;
+    left: -100px;
+    background: radial-gradient(circle at center, rgba(215, 204, 200, 0.25), transparent 70%);
+    animation: float2 8s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes float1 {
+    from { transform: translateY(0px); }
+    to { transform: translateY(25px); }
+}
+@keyframes float2 {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-25px); }
+}
+
+/* Layout */
+.seller-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark));
+    color: var(--tan);
+    padding: 20px 10px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    border-right: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 250px;
+    padding: 30px;
+    background: transparent;
+    min-height: 100vh;
+    padding-bottom: 100px;
+    position: relative;
+}
+
+/* Sidebar Styles */
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 15px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 10px;
+    margin-bottom: 25px;
+}
+
+.sidebar-header h3 {
+    color: white;
+    font-size: 1.4rem;
+    margin: 10px 0 5px 0;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-header small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 5px;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin: 4px 8px;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    text-decoration: none;
+    transform: translateX(5px);
+    border-left-color: var(--tan);
+}
+
+.sidebar-nav i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.sidebar-nav .nav-category {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 25px 8px 8px 16px;
+    padding: 8px 8px;
+    display: block;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .sidebar-toggle {
+        display: block !important;
+    }
+}
+
+/* Header */
+.seller-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: -30px -30px 30px -30px;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, #fff, #f9f5ee);
+    border-bottom: 1px solid rgba(109, 76, 65, 0.1);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 10;
+}
+
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--dark);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.sidebar-toggle:hover {
+    background-color: #e3e6f0;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    margin-bottom: 25px;
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark));
+    color: white !important;
+    border: none;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+/* Ensure all text in card header is white */
+.card-header * {
+    color: white !important;
+}
+
+.card-body {
+    color: #4a4a4a;
+    padding: 1.5rem;
+}
+
+.card-header h5, 
+.card-header h6, 
+.card-header .h5, 
+.card-header .h6 {
+    margin: 0;
+    color: white !important;
+    font-weight: 600;
+    visibility: visible !important;
+}
+
+.card-text {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+/* Ensure text is visible on cards */
+.card .text-primary { color: var(--brown-primary) !important; }
+.card .text-success { color: #28a745 !important; }
+.card .text-warning { color: #ffc107 !important; }
+.card .text-danger { color: #dc3545 !important; }
+.card .text-muted { color: #6c757d !important; }
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Footer */
+.seller-footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin-top: 30px;
+    border-top: 1px solid #e3e6f0;
+}
+
+/* Responsive Tables */
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8f9fc;
+    border-bottom: 2px solid #e3e6f0;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+}
+
+.table td, .table th {
+    padding: 1rem;
+    vertical-align: middle;
+    border-top: 1px solid #e3e6f0;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+.btn-success {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.btn-success:hover {
+    background-color: #17a673;
+    border-color: #169b6b;
+}
+
+/* Badges */
+.badge {
+    padding: 0.45em 0.75em;
+    font-weight: 600;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background-color: rgba(28, 200, 138, 0.1);
+    color: #1cc88a;
+}
+
+.badge-warning {
+    background-color: rgba(246, 194, 62, 0.1);
+    color: #f6c23e;
+}
+
+.badge-danger {
+    background-color: rgba(231, 74, 59, 0.1);
+    color: #e74a3b;
+}
+
+/* Form Controls */
+.form-control, .form-select {
+    border: 1px solid #d1d3e2;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #bac8f3;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+}
+
+/* Charts */
+.chart-area, .chart-pie {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Responsive Utilities */
+@media (min-width: 1200px) {
+    .col-xl-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Print Styles */
+@media print {
+    .sidebar, .no-print {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        padding: 20px !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #e3e6f0 !important;
+    }
+}
+</style>
+
+<div class="seller-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h3>Pawfect Finds</h3>
+            <small>Seller Dashboard</small>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <span class="nav-category">Main</span>
+            <li>
+                <a href="{{ url_for('seller.dashboard') }}" class="{{ 'active' if request.endpoint == 'seller.dashboard' }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            
+            <span class="nav-category">Products</span>
+            <li>
+                <a href="{{ url_for('seller.products') }}" class="{{ 'active' if request.endpoint == 'seller.products' }}">
+                    <i class="fas fa-box"></i> My Products
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('seller.add_product') }}" class="{{ 'active' if request.endpoint == 'seller.add_product' }}">
+                    <i class="fas fa-plus-circle"></i> Add Product
+                </a>
+            </li>
+            
+            <span class="nav-category">Orders</span>
+            <li>
+                <a href="{{ url_for('seller.orders') }}" class="{{ 'active' if request.endpoint == 'seller.orders' }} position-relative">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                    {% if pending_orders and pending_orders > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ pending_orders }}
+                            <span class="visually-hidden">pending orders</span>
+                        </span>
+                    {% endif %}
+                </a>
+            </li>
+            
+            <span class="nav-category">Analytics</span>
+            <li>
+                <a href="{{ url_for('seller.analytics') }}" class="{{ 'active' if request.endpoint == 'seller.analytics' }}">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+            </li>
+            <li>
+               
+            <span class="nav-category">Account</span>
+            <li>
+                <a href="{{ url_for('auth.profile') }}">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('auth.logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Header -->
+            <header class="seller-header">
+                <button class="sidebar-toggle d-lg-none" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="user-menu">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-2">
+                            {{ current_user.first_name[0]|upper }}{{ current_user.last_name[0]|upper }}
+                        </div>
+                        <div class="d-none d-md-block">
+                            <div class="fw-bold">{{ current_user.first_name }} {{ current_user.last_name }}</div>
+                            <small class="text-muted">Seller</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            {% block seller_content %}{% endblock %}
+            
+            <!-- Footer -->
+            <footer class="seller-footer">
+                <p class="mb-0">&copy; <span id="current-year"></span> Pawfect Finds. All rights reserved.</p>
+            </footer>
+        </div>
+    </main>
+</div>
+
+<!-- JavaScript for sidebar toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('show');
+        });
+    }
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        const isClickInside = sidebar.contains(event.target) || sidebarToggle.contains(event.target);
+        
+        if (!isClickInside && window.innerWidth < 992) {
+            sidebar.classList.remove('show');
+        }
+    });
+    
+    // Handle window resize
+    function handleResize() {
+        if (window.innerWidth >= 992) {
+            sidebar.classList.remove('show');
+        }
+    }
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Set current year in footer
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+});
+</script>
+
+{% endblock %}

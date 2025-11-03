@@ -1,0 +1,273 @@
+{% extends "seller/seller_base.html" %}
+
+{% block title %}Manage Orders - Seller Dashboard{% endblock %}
+
+{% block seller_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-shopping-cart"></i> Order Management</h2>
+                    <p class="text-muted">View and manage customer orders for your products</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="statusFilter" onchange="filterOrders()">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders List -->
+    <div class="row">
+        <div class="col-12">
+            {% if orders %}
+                {% for order in orders %}
+                    <div class="card mb-3 order-card" data-status="{{ order.status }}">
+                        <div class="card-header bg-light">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1">
+                                        Order #{{ order.id }}
+                                        <span class="badge bg-{{ 'warning' if order.status == 'pending' else 'primary' if order.status == 'processing' else 'info' if order.status == 'shipped' else 'success' if order.status == 'delivered' else 'danger' }} ms-2">
+                                            {{ order.status.title() }}
+                                        </span>
+                                    </h5>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                    </small>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <h5 class="mb-1">${{ "%.2f"|format(order.total_amount) }}</h5>
+                                    <small class="text-muted">{{ order.items_count }} item(s)</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Customer Information -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-user"></i> Customer Details</h6>
+                                    <p class="mb-1"><strong>{{ order.customer_name }}</strong></p>
+                                    <p class="mb-1 text-muted">{{ order.customer_email }}</p>
+                                    {% if order.customer_phone %}
+                                        <p class="mb-0 text-muted">{{ order.customer_phone }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-map-marker-alt"></i> Shipping Address</h6>
+                                    <p class="mb-0 text-muted">
+                                        {{ order.shipping_address }}<br>
+                                        {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Items -->
+                            <div class="mb-3">
+                                <h6><i class="fas fa-box"></i> Items Ordered</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Quantity</th>
+                                                <th>Price</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in order['items'] %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="{{ item.image_url or 'https://via.placeholder.com/40x40?text=Product' }}"
+                                                                 class="me-2 rounded" style="width: 40px; height: 40px; object-fit: cover;"
+                                                                 alt="{{ item.name }}">
+                                                            <span>{{ item.name }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>{{ item.quantity }}</td>
+                                                    <td>${{ "%.2f"|format(item.price_at_time) }}</td>
+                                                    <td>${{ "%.2f"|format(item.quantity * item.price_at_time) }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Actions -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#orderDetailModal" 
+                                            onclick="viewOrderDetail('{{ order.id }}')">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                </div>
+                                <div>
+                                    {% if order.status in ['pending', 'confirmed', 'preparing'] %}
+                                        <form method="POST" action="{{ url_for('seller.update_order_status') }}" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                            <select name="status" class="form-select form-select-sm d-inline-block w-auto me-2"
+                                                    onchange="if(confirm('Are you sure you want to change the status to ' + this.options[this.selectedIndex].text + '?')) { this.form.submit(); } else { this.selectedIndex = 0; }">
+                                                <option value="" disabled selected>Change Status</option>
+                                                {% if order.status == 'pending' %}
+                                                    <option value="confirmed">Confirm Order</option>
+                                                    <option value="cancelled">Cancel Order</option>
+                                                {% elif order.status == 'confirmed' %}
+                                                    <option value="preparing">Mark as Preparing</option>
+                                                    <option value="cancelled">Cancel Order</option>
+                                                {% elif order.status == 'preparing' %}
+                                                    <option value="shipped">Mark as Shipped</option>
+                                                    <option value="cancelled">Cancel Order</option>
+                                                {% endif %}
+                                            </select>
+                                        </form>
+                                    {% endif %}
+                                    {% if order.status == 'shipped' %}
+                                        <form method="POST" action="{{ url_for('seller.update_order_status') }}" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this order as On the Way?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                            <input type="hidden" name="status" value="on_the_way">
+                                            <button type="submit" class="btn btn-info btn-sm me-2">
+                                                <i class="fas fa-truck"></i> Mark as On the Way
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('seller.update_order_status') }}" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this order as Delivered?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                            <input type="hidden" name="status" value="delivered">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> Mark as Delivered
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    {% if order.status == 'on_the_way' %}
+                                        <form method="POST" action="{{ url_for('seller.update_order_status') }}" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this order as Delivered?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                            <input type="hidden" name="status" value="delivered">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> Mark as Delivered
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Orders Yet</h4>
+                        <p class="text-muted mb-4">Orders for your products will appear here once customers start purchasing.</p>
+                        <a href="{{ url_for('seller.products') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Products
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailContent">
+                <!-- Order detail content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterOrders() {
+    const filter = document.getElementById('statusFilter').value.toLowerCase();
+    const orders = document.querySelectorAll('.order-card');
+    
+    orders.forEach(order => {
+        const status = order.getAttribute('data-status').toLowerCase();
+        if (filter === '' || status === filter) {
+            order.style.display = 'block';
+        } else {
+            order.style.display = 'none';
+        }
+    });
+}
+
+function viewOrderDetail(orderId) {
+    // This would typically make an AJAX call to fetch order details
+    // For now, we'll show a placeholder
+    const content = `
+        <div class="text-center py-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading order details...</p>
+        </div>
+    `;
+    document.getElementById('orderDetailContent').innerHTML = content;
+    
+    // Simulate loading order details (replace with actual AJAX call)
+    setTimeout(() => {
+        fetch(`/seller/order/${orderId}/details`)
+            .then(response => response.json())
+            .then(data => {
+                // Update modal content with actual order details
+                document.getElementById('orderDetailContent').innerHTML = data.html;
+            })
+            .catch(error => {
+                document.getElementById('orderDetailContent').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Error loading order details. Please try again.
+                    </div>
+                `;
+            });
+    }, 1000);
+}
+
+// Auto-submit status change forms with confirmation
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelects = document.querySelectorAll('select[name="status"]');
+    statusSelects.forEach(select => {
+        select.addEventListener('change', function(e) {
+            e.preventDefault();
+            const status = this.value;
+            const orderId = this.form.querySelector('input[name="order_id"]').value;
+
+            let message = `Are you sure you want to change this order's status to "${status}"?`;
+            if (status === 'cancelled') {
+                message = 'Are you sure you want to cancel this order? This action cannot be undone.';
+            }
+
+            if (confirm(message)) {
+                this.form.submit();
+            } else {
+                this.selectedIndex = 0; // Reset to default option
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

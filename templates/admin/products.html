@@ -1,0 +1,199 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Products - Admin Panel{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-boxes"></i> Product Management</h2>
+                    <p class="text-muted">Monitor and manage all products on the platform</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="categoryFilter" onchange="filterProducts()">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if current_category == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <select class="form-select" id="statusFilter" onchange="filterProducts()">
+                        <option value="">All Statuses</option>
+                        <option value="active" {% if current_status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="out_of_stock" {% if current_status == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if products %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Seller</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="{{ product.image_url|image_url }}"
+                                                         class="me-3 rounded" style="width: 50px; height: 40px; object-fit: cover;"
+                                                         alt="{{ product.name or 'Product' }}" loading="lazy" decoding="async">
+                                                    <div>
+                                                        <h6 class="mb-0">{{ product.name or 'Unnamed Product' }}</h6>
+                                                        <small class="text-muted">
+                                                            {{ product.description|default('')|truncate(50) }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ product.seller_name or 'Unknown' }}</strong><br>
+                                                    <small class="text-muted">ID: {{ product.seller_id or '-' }}</small>
+                                                </div>
+                                            </td>
+                                            <td>{{ product.category_name or 'Uncategorized' }}</td>
+                                            <td>{{ (product.price or 0.0)|apply_discount|php }}
+                                                <small class="text-muted text-decoration-line-through">{{ (product.price or 0.0)|php }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{% if (product.stock_quantity or 0) == 0 %}danger{% elif (product.stock_quantity or 0) <= 5 %}warning{% else %}success{% endif %}">
+                                                    {{ product.stock_quantity or 0 }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{% if product.status == 'active' %}success{% elif product.status == 'out_of_stock' %}danger{% else %}secondary{% endif %}">
+                                                    {{ (product.status or 'unknown').replace('_', ' ').title() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if product.created_at %}
+                                                    {{ product.created_at.strftime('%m/%d/%Y') }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                        Actions
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <button class="dropdown-item" onclick="viewProductDetails({{ product.id }})">
+                                                                <i class="fas fa-eye"></i> View Details
+                                                            </button>
+                                                        </li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li>
+                                                            <form method="POST" action="{{ url_for('admin.toggle_product_status', product_id=product.id) }}" class="d-inline">
+                                                                {{ csrf_token() }}
+                                                                <button type="submit" class="dropdown-item">
+                                                                    <i class="fas fa-toggle-{{ 'off' if product.status == 'active' else 'on' }}"></i>
+                                                                    {{ 'Deactivate' if product.status == 'active' else 'Activate' }} Product
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                        <li>
+                                                            <form method="POST" action="{{ url_for('admin.remove_product', product_id=product.id) }}" class="d-inline"
+                                                                  onsubmit="return confirm('Are you sure you want to remove this product? This action cannot be undone.')">
+                                                                {{ csrf_token() }}
+                                                                <button type="submit" class="dropdown-item text-danger">
+                                                                    <i class="fas fa-trash"></i> Remove Product
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No Products Found</h4>
+                            <p class="text-muted">No products match the current filters.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Details Modal -->
+<div class="modal fade" id="productDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Product Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="productDetailsContent">
+                <!-- Product details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterProducts() {
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const url = new URL(window.location.href);
+    if (categoryFilter) url.searchParams.set('category', categoryFilter);
+    else url.searchParams.delete('category');
+
+    if (statusFilter) url.searchParams.set('status', statusFilter);
+    else url.searchParams.delete('status');
+
+    // preserve other params like page
+    window.location.href = url.toString();
+}
+
+function viewProductDetails(productId) {
+    const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
+    const content = document.getElementById('productDetailsContent');
+
+    // Show loading
+    const loadingHtml = '<div class="text-center py-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading product details...</p></div>';
+    content.innerHTML = loadingHtml;
+
+    modal.show();
+
+    // Placeholder for AJAX product details
+    setTimeout(() => {
+        const placeholderHtml = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Product details loading functionality would be implemented here.</div>';
+        content.innerHTML = placeholderHtml;
+    }, 1000);
+}
+</script>
+{% endblock %}

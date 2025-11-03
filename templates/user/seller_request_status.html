@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Seller Request Status - Pawfect Finds{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header text-center bg-{{ 
+                    'warning' if request.status == 'pending' else
+                    'success' if request.status == 'approved' else
+                    'danger' if request.status == 'rejected' else
+                    'secondary'
+                }} text-white">
+                    <h4>
+                        <i class="fas fa-{{ 
+                            'clock' if request.status == 'pending' else
+                            'check-circle' if request.status == 'approved' else
+                            'times-circle' if request.status == 'rejected' else
+                            'question-circle'
+                        }}"></i> 
+                        Seller Request {{ request.status.title() }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Status Message -->
+                    <div class="alert alert-{{ 
+                        'warning' if request.status == 'pending' else
+                        'success' if request.status == 'approved' else
+                        'danger' if request.status == 'rejected' else
+                        'secondary'
+                    }}">
+                        <i class="fas fa-info-circle"></i>
+                        {% if request.status == 'pending' %}
+                            <strong>Your seller request is being reviewed.</strong>
+                            <p class="mb-0">Our admin team will review your application and get back to you soon. This process typically takes 1-3 business days.</p>
+                        {% elif request.status == 'approved' %}
+                            <strong>Congratulations! Your seller request has been approved.</strong>
+                            <p class="mb-0">You can now start selling products on Pawfect Finds. Welcome to our seller community!</p>
+                        {% elif request.status == 'rejected' %}
+                            <strong>We regret to inform you that your seller request has been rejected.</strong>
+                            <p class="mb-0">Please review the admin notes below for more information. You can submit a new request after addressing the concerns.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Request Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-store"></i> Business Information</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Business Name:</strong></td>
+                                    <td>{{ request.business_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Phone:</strong></td>
+                                    <td>{{ request.business_phone }}</td>
+                                </tr>
+                                {% if request.tax_id %}
+                                    <tr>
+                                        <td><strong>Tax ID:</strong></td>
+                                        <td>{{ request.tax_id }}</td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-calendar"></i> Request Timeline</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Submitted:</strong></td>
+                                    <td>{{ request.requested_at.strftime('%B %d, %Y at %I:%M %p') }}</td>
+                                </tr>
+                                {% if request.reviewed_at %}
+                                    <tr>
+                                        <td><strong>Reviewed:</strong></td>
+                                        <td>{{ request.reviewed_at.strftime('%B %d, %Y at %I:%M %p') }}</td>
+                                    </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Business Description -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-align-left"></i> Business Description</h6>
+                        <p class="text-muted">{{ request.business_description }}</p>
+                    </div>
+                    
+                    <!-- Business Address -->
+                    <div class="mb-4">
+                        <h6><i class="fas fa-map-marker-alt"></i> Business Address</h6>
+                        <p class="text-muted">{{ request.business_address }}</p>
+                    </div>
+                    
+                    <!-- Admin Notes -->
+                    {% if request.admin_notes %}
+                        <div class="mb-4">
+                            <h6><i class="fas fa-comment"></i> Admin Notes</h6>
+                            <div class="alert alert-light border">
+                                <p class="mb-0">{{ request.admin_notes }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="text-center">
+                        {% if request.status == 'approved' %}
+                            <a href="{{ url_for('seller.dashboard') }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-store"></i> Go to Seller Dashboard
+                            </a>
+                        {% elif request.status == 'rejected' %}
+                            <a href="{{ url_for('user.become_seller') }}" class="btn btn-primary">
+                                <i class="fas fa-redo"></i> Submit New Request
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary {{ 'ms-2' if request.status != 'pending' }}">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Next Steps (for approved sellers) -->
+            {% if request.status == 'approved' %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-rocket"></i> Next Steps</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="mb-2">
+                                    <i class="fas fa-plus-circle fa-2x text-primary"></i>
+                                </div>
+                                <h6>1. Add Products</h6>
+                                <p class="text-muted small">Start by adding your first products to your store catalog.</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="mb-2">
+                                    <i class="fas fa-shopping-cart fa-2x text-success"></i>
+                                </div>
+                                <h6>2. Manage Orders</h6>
+                                <p class="text-muted small">Monitor and fulfill customer orders as they come in.</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="mb-2">
+                                    <i class="fas fa-chart-line fa-2x text-info"></i>
+                                </div>
+                                <h6>3. Grow Your Business</h6>
+                                <p class="text-muted small">Use our tools to analyze sales and expand your reach.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Tips for Pending Requests -->
+            {% if request.status == 'pending' %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-lightbulb"></i> While You Wait</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i> 
+                                Prepare your product catalog and descriptions
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i> 
+                                Gather high-quality product images
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i> 
+                                Set up your shipping and pricing strategy
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success"></i> 
+                                Review our seller guidelines and policies
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

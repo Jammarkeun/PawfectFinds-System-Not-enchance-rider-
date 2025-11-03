@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-light: #A1887F;
+    --beige: #F5EBDD;
+}
+
+body {
+    background-color: var(--beige);
+    color: var(--brown-dark);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.card-header {
+    background-color: var(--brown-primary);
+    color: #fff;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    font-weight: 600;
+}
+
+h2 {
+    color: var(--brown-dark);
+}
+
+h5, h6 {
+    color: var(--beige);
+}
+
+.btn-primary {
+    background-color: var(--brown-primary);
+    border-color: var(--brown-primary);
+}
+.btn-primary:hover {
+    background-color: var(--brown-dark);
+    border-color: var(--brown-dark);
+}
+
+.btn-warning {
+    background-color: var(--brown-light);
+    border-color: var(--brown-light);
+    color: #fff;
+}
+.btn-warning:hover {
+    background-color: var(--brown-dark);
+    border-color: var(--brown-dark);
+    color: #fff;
+}
+
+/* Brown outline buttons */
+.btn-outline-brown {
+    color: var(--brown-primary);
+    border: 1px solid var(--brown-primary);
+    background-color: transparent;
+}
+.btn-outline-brown:hover {
+    color: #fff;
+    background-color: var(--brown-primary);
+    border-color: var(--brown-primary);
+}
+
+/* For existing outline-primary replaced with brown theme */
+.btn-outline-primary {
+    color: var(--brown-primary);
+    border-color: var(--brown-primary);
+}
+.btn-outline-primary:hover {
+    background-color: var(--brown-primary);
+    color: #fff;
+    border-color: var(--brown-primary);
+}
+
+.text-muted {
+    color: #7b5f52 !important;
+}
+
+.form-label {
+    color: var(--brown-dark);
+    font-weight: 500;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+.form-control:focus {
+    border-color: var(--brown-primary);
+    box-shadow: 0 0 0 0.2rem rgba(109, 76, 65, 0.25);
+}
+
+hr {
+    border-top: 1px solid var(--brown-light);
+}
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-cog"></i> Account Settings</h2>
+            <p class="text-muted">Manage your profile and account preferences</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Profile Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user"></i> Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ profile_form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ profile_form.first_name.label(class="form-label") }}
+                                {{ profile_form.first_name(class="form-control", value=user.first_name) }}
+                                {% for error in profile_form.first_name.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ profile_form.last_name.label(class="form-label") }}
+                                {{ profile_form.last_name(class="form-control", value=user.last_name) }}
+                                {% for error in profile_form.last_name.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ profile_form.username.label(class="form-label") }}
+                                {{ profile_form.username(class="form-control", value=user.username) }}
+                                {% for error in profile_form.username.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ profile_form.email.label(class="form-label") }}
+                                {{ profile_form.email(class="form-control", value=user.email) }}
+                                {% for error in profile_form.email.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ profile_form.phone.label(class="form-label") }}
+                            {{ profile_form.phone(class="form-control", value=user.phone or '') }}
+                            {% for error in profile_form.phone.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ profile_form.address.label(class="form-label") }}
+                            {{ profile_form.address(class="form-control", rows=3, value=user.address or '') }}
+                            {% for error in profile_form.address.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ profile_form.profile_image.label(class="form-label") }}
+                            {{ profile_form.profile_image(class="form-control") }}
+                            {% if user.profile_image %}
+                                <div class="mt-2">
+                                    <img src="{{ user.profile_image|image_url }}" alt="Current Profile Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">
+                                    <small class="text-muted">Current profile image</small>
+                                </div>
+                            {% endif %}
+                            {% for error in profile_form.profile_image.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Upload JPG, PNG, or JPEG images only.</small>
+                        </div>
+
+                        {% if user.id_picture %}
+                        <div class="mb-3">
+                            <label class="form-label">ID Picture</label>
+                            <div class="mt-2">
+                                <img src="{{ user.id_picture|image_url }}" alt="ID Picture" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                                <small class="text-muted">Your uploaded ID picture</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {{ profile_form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Change Password -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lock"></i> Change Password</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ password_form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ password_form.current_password.label(class="form-label") }}
+                            {{ password_form.current_password(class="form-control", id="current_password") }}
+                            {% for error in password_form.current_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ password_form.new_password.label(class="form-label") }}
+                                {{ password_form.new_password(class="form-control", id="new_password") }}
+                                <small class="text-muted">At least 6 characters</small>
+                                {% for error in password_form.new_password.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ password_form.confirm_password.label(class="form-label") }}
+                                {{ password_form.confirm_password(class="form-control", id="confirm_password") }}
+                                {% for error in password_form.confirm_password.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        {{ password_form.submit(class="btn btn-warning", id="password_submit") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Account Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-circle"></i> Account Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted">Account Type</small>
+                            <p class="fw-bold mb-0">
+                                <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'success' if user.role == 'seller' else 'primary' }}">
+                                    {{ user.role.title() }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Status</small>
+                            <p class="fw-bold mb-0">
+                                <span class="badge bg-{{ 'success' if user.status == 'active' else 'warning' if user.status == 'inactive' else 'danger' }}">
+                                    {{ user.status.title() }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">Member Since</small>
+                        <p class="mb-0">{{ user.created_at.strftime('%B %Y') }}</p>
+                    </div>
+                    
+                    {% if user.role == 'user' %}
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('user.view_cart') }}" class="btn btn-outline-brown btn-sm">
+                                <i class="fas fa-shopping-cart"></i> View Cart
+                            </a>
+                            <a href="{{ url_for('user.orders') }}" class="btn btn-outline-brown btn-sm">
+                                <i class="fas fa-box"></i> My Orders
+                            </a>
+                            <a href="{{ url_for('public.browse_products') }}" class="btn btn-outline-brown btn-sm">
+                                <i class="fas fa-shopping-bag"></i> Shop Products
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('new_password').value;
+    const confirmPassword = this.value;
+    this.setCustomValidity(password !== confirmPassword ? 'Passwords do not match' : '');
+});
+
+document.getElementById('new_password').addEventListener('input', function() {
+    const confirmPassword = document.getElementById('confirm_password');
+    if (confirmPassword.value) confirmPassword.dispatchEvent(new Event('input'));
+});
+</script>
+{% endblock %}

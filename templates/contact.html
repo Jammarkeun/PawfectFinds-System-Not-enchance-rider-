@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - Pawfect Finds{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 mb-3">Get in Touch</h1>
+                <p class="lead">We'd love to hear from you! Whether you have questions, feedback, or need support, our team is here to help.</p>
+            </div>
+            <div class="col-lg-4 text-center">
+                <i class="fas fa-envelope fa-5x mb-3"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Form & Info Section -->
+<div class="container py-5">
+    <div class="row">
+        <!-- Contact Form -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="mb-4"><i class="fas fa-paper-plane"></i> Send us a Message</h3>
+                    <form method="POST" action="{{ url_for('public.contact') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject *</label>
+                            <select class="form-select" id="subject" name="subject" required>
+                                <option value="">Select a topic</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="order">Order Support</option>
+                                <option value="seller">Become a Seller</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="partnership">Partnership Opportunity</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" 
+                                      placeholder="Tell us how we can help..." required></textarea>
+                        </div>
+                        
+                        <!-- Newsletter Signup -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter" value="1">
+                                <label class="form-check-label" for="newsletter">
+                                    Subscribe to our newsletter for pet care tips and exclusive offers
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="col-lg-4">
+            <div class="card bg-light border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-info-circle"></i> Contact Information</h5>
+                    
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <strong>Email</strong><br>
+                            <a href="mailto:support@pawfectfinds.com" class="text-decoration-none">pawfectfindsshop76@gmail.com</a>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <strong>Phone</strong><br>
+                            <a href="tel:+15551234567" class="text-decoration-none">+1 (555) 123-4567</a><br>
+                            <small class="text-muted">Mon-Fri, 9am-6pm EST</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <strong>Response Time</strong><br>
+                            Within 24 hours<br>
+                            <small class="text-muted">Usually much faster!</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ Quick Links -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-question-circle"></i> Quick Help</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action border-0">
+                            <i class="fas fa-shipping-fast text-primary me-2"></i>
+                            Track Your Order
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action border-0">
+                            <i class="fas fa-undo text-warning me-2"></i>
+                            Returns & Refunds
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action border-0">
+                            <i class="fas fa-store text-success me-2"></i>
+                            Seller Information
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action border-0">
+                            <i class="fas fa-shield-alt text-info me-2"></i>
+                            Account Security
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2>Frequently Asked Questions</h2>
+            <p class="lead text-muted">Find answers to common questions before reaching out.</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                How do I track my order?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Once your order ships, you'll receive a tracking number via email. You can also check your order status by logging into your account and viewing your order history.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                What is your return policy?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We offer a 30-day return policy for most items. Products must be in original condition and packaging. Some restrictions apply for perishable items and custom products.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                How do I become a seller on Pawfect Finds?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                To become a seller, create an account and submit a seller application. Our team reviews applications within 5-7 business days. We look for quality products and reliable sellers committed to pet wellness.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                How do you ensure product quality?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                All sellers and products go through our quality review process. We check credentials, product safety, and customer reviews. Our team also conducts periodic quality checks to maintain high standards.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Social Media Section -->
+<div class="bg-primary text-white py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="mb-2">Stay Connected</h4>
+                <p class="mb-0">Follow us on social media for pet care tips, product updates, and community stories.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="social-links">
+                    <a href="#" class="text-white me-3 fs-4"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white me-3 fs-4"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-white fs-4"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

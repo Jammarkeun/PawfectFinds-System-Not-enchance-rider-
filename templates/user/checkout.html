@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-light: #A1887F;
+    --beige: #F5E9DC;
+    --white: #FFFFFF;
+}
+
+body {
+    background-color: var(--beige);
+    color: var(--brown-dark);
+}
+
+h2 {
+    color: var(--brown-dark);
+    margin-top: 10px;
+}
+
+h5, h6 {
+    color: var(--white);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: var(--white);
+}
+
+.card-header {
+    background-color: var(--brown-primary);
+    color: var(--white);
+    border-radius: 10px 10px 0 0;
+}
+
+.card-body {
+    background-color: var(--white);
+    color: var(--brown-dark);
+}
+
+.text-muted {
+    color: var(--brown-light) !important;
+}
+
+.btn-primary {
+    background-color: var(--brown-primary);
+    border-color: var(--brown-primary);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--brown-dark);
+    border-color: var(--brown-dark);
+}
+
+.btn-outline-secondary {
+    color: var(--brown-primary);
+    border-color: var(--brown-primary);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--brown-primary);
+    color: var(--white);
+}
+
+textarea.form-control, 
+input.form-control {
+    border-color: var(--brown-light);
+}
+
+textarea.form-control:focus, 
+input.form-control:focus {
+    border-color: var(--brown-primary);
+    box-shadow: 0 0 5px rgba(109, 76, 65, 0.3);
+}
+
+hr {
+    border-top: 1px solid var(--brown-light);
+}
+
+.text-primary {
+    color: var(--brown-primary) !important;
+}
+
+.btn-lg {
+    border-radius: 8px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.alert-info {
+    background-color: var(--beige);
+    color: var(--brown-dark);
+    border-left: 4px solid var(--brown-primary);
+}
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-credit-card"></i> Checkout</h2>
+            <p class="text-muted">Complete your order</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shipping-fast"></i> Shipping Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token_value }}">
+                        
+                        <div class="mb-3">
+                            <label for="shipping_address" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Shipping Address *
+                            </label>
+                            <textarea class="form-control" id="shipping_address" name="shipping_address" 
+                                      rows="3" required placeholder="Enter your complete shipping address">{{ user.address or '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-money-bill-wave"></i> Payment Method *
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_method" 
+                                               id="cod" value="cod" checked>
+                                        <label class="form-check-label" for="cod">
+                                            <i class="fas fa-money-bill-wave"></i> Cash on Delivery (COD)
+                                        </label>
+                                        <small class="form-text text-muted d-block">Pay when your order arrives</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_method" 
+                                               id="online" value="online">
+                                        <label class="form-check-label" for="online">
+                                            <i class="fas fa-credit-card"></i> Online Payment
+                                        </label>
+                                        <small class="form-text text-muted d-block">Pay now with credit/debit card</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">
+                                <i class="fas fa-sticky-note"></i> Order Notes (Optional)
+                            </label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2" 
+                                      placeholder="Any special instructions for delivery..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('user.view_cart') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Cart
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check"></i> Place Order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 100px;">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-receipt"></i> Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Items ({{ cart_items|length }})</h6>
+                        {% for item in cart_items %}
+                            <div class="d-flex align-items-center mb-2 pb-2 border-bottom">
+                                <img src="{{ item.image_url or 'https://via.placeholder.com/50x40?text=Product' }}" 
+                                     class="me-2 rounded" style="width: 50px; height: 40px; object-fit: cover;" 
+                                     alt="{{ item.name }}">
+                                <div class="flex-grow-1">
+                                    <small class="d-block fw-bold">{{ item.name }}</small>
+                                    <small class="text-muted">Qty: {{ item.quantity }} × ${{ "%.2f"|format(item.price) }}</small>
+                                </div>
+                                <small class="fw-bold">${{ "%.2f"|format(item.price * item.quantity) }}</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <span>${{ "%.2f"|format(total) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span class="text-success">FREE</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax</span>
+                            <span>$0.00</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <strong>Total</strong>
+                            <strong class="text-primary h5">${{ "%.2f"|format(total) }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i>
+                        <small>
+                            <strong>Note:</strong> Orders are processed per seller. You may receive multiple packages if items are from different sellers.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('input[name="payment_method"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        if (this.value === 'online') {
+            console.log('Online payment selected');
+        }
+    });
+});
+</script>
+{% endblock %}

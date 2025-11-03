@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+/* ============================
+   MODERN ADMIN DASHBOARD UI
+   Professional Design with Brown Theme
+=============================== */
+
+:root {
+    --primary-brown: #8B4513;
+    --secondary-brown: #5D4037;
+    --light-brown: #F3E3D3;
+    --accent-brown: #A1887F;
+    --dark-brown: #4E342E;
+    --bg-color: #F9F5F0;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --card-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Layout */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, var(--secondary-brown), var(--dark-brown));
+    color: white;
+    padding: 30px 20px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 30px;
+    background-color: var(--bg-color);
+    min-height: 100vh;
+    padding-bottom: 100px; /* Space for footer */
+}
+
+/* Sidebar Styles */
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-header h3 {
+    color: white;
+    font-size: 1.5rem;
+    margin: 10px 0 0 0;
+    font-weight: 600;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    margin-bottom: 8px;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.sidebar-nav i {
+    margin-right: 12px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Header */
+.dashboard-header {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-header h1 {
+    color: var(--dark-brown);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--primary-brown);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+.stat-card.primary { border-left-color: var(--primary-brown); }
+.stat-card.success { border-left-color: #4CAF50; }
+.stat-card.warning { border-left-color: #FF9800; }
+.stat-card.info { border-left-color: #2196F3; }
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark-brown);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: var(--accent-brown);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: var(--primary-brown);
+    margin-bottom: 15px;
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+/* Main Content Area */
+.main-section {
+    display: grid;
+    gap: 30px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: var(--card-shadow);
+}
+
+.quick-actions h3 {
+    color: var(--dark-brown);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.quick-actions h3 i {
+    margin-right: 10px;
+    color: var(--primary-brown);
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--primary-brown), var(--secondary-brown));
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 69, 19, 0.4);
+    color: white;
+}
+
+.action-btn i {
+    margin-right: 8px;
+}
+
+/* Recent Activity */
+.recent-activity {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: var(--card-shadow);
+}
+
+.recent-activity h3 {
+    color: var(--dark-brown);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.recent-activity h3 i {
+    margin-right: 10px;
+    color: var(--primary-brown);
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light-brown);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: var(--primary-brown);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content .title {
+    font-weight: 500;
+    color: var(--dark-brown);
+    margin-bottom: 2px;
+}
+
+.activity-content .meta {
+    font-size: 0.85rem;
+    color: var(--accent-brown);
+}
+
+/* Sidebar Widgets */
+.sidebar-widgets {
+    display: grid;
+    gap: 30px;
+}
+
+/* System Status */
+.system-status {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: var(--card-shadow);
+}
+
+.system-status h4 {
+    color: var(--dark-brown);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.system-status h4 i {
+    margin-right: 8px;
+    color: var(--primary-brown);
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.status-item:last-child {
+    border-bottom: none;
+}
+
+.status-label {
+    color: var(--accent-brown);
+    font-size: 0.9rem;
+}
+
+.status-value {
+    font-weight: 500;
+    color: var(--dark-brown);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4CAF50;
+    margin-left: 8px;
+}
+
+/* Admin Footer */
+.admin-footer {
+    background: white;
+    border-top: 1px solid #e0e0e0;
+    padding: 20px 30px;
+    margin-left: 280px;
+    margin-top: -100px; /* Pull up to avoid overlap */
+    text-align: center;
+    color: var(--accent-brown);
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 250px;
+    }
+    .main-content {
+        margin-left: 250px;
+    }
+    .admin-footer {
+        margin-left: 250px;
+    }
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+        padding: 20px;
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    .admin-footer {
+        margin-left: 0;
+        margin-top: 0;
+    }
+    .dashboard-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='PF-logo.png') }}" alt="Pawfect Finds" style="width: 50px; height: 50px; border-radius: 50%; margin-bottom: 10px;">
+            <h3>Admin Panel</h3>
+        </div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li><a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}active{% endif %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('admin.manage_users') }}" class="{% if request.endpoint == 'admin.manage_users' %}active{% endif %}"><i class="fas fa-users"></i> Users</a></li>
+                <li><a href="{{ url_for('admin.seller_requests') }}" class="{% if request.endpoint == 'admin.seller_requests' %}active{% endif %}"><i class="fas fa-handshake"></i> Seller Requests</a></li>
+                <li><a href="{{ url_for('admin.manage_products') }}" class="{% if request.endpoint == 'admin.manage_products' %}active{% endif %}"><i class="fas fa-box"></i> Products</a></li>
+                <li><a href="{{ url_for('admin.manage_orders') }}" class="{% if request.endpoint == 'admin.manage_orders' %}active{% endif %}"><i class="fas fa-shopping-cart"></i> Orders</a></li>
+                <li><a href="{{ url_for('admin.analytics') }}" class="{% if request.endpoint == 'admin.analytics' %}active{% endif %}"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                <li><a href="{{ url_for('admin.system_settings') }}" class="{% if request.endpoint == 'admin.system_settings' %}active{% endif %}"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block admin_content %}{% endblock %}
+    </main>
+</div>
+
+<!-- Admin Footer -->
+<footer class="admin-footer">
+    <p>&copy; 2025 Pawfect Finds Admin Panel. All rights reserved.</p>
+</footer>
+
+{% endblock %}

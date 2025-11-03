@@ -1,0 +1,590 @@
+{% extends "seller/seller_base.html" %}
+
+{% block title %}Analytics - Seller Dashboard{% endblock %}
+
+{% block seller_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-chart-line"></i> Sales Analytics</h2>
+                    <p class="text-muted">Track your sales performance and customer insights</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Revenue (12m)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                ₱{{ "%.2f"|format(revenue_trends|sum(attribute='revenue')|float) }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Orders (12m)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ revenue_trends|sum(attribute='orders')|int }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Avg. Order Value</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                ₱{{ "%.2f"|format((revenue_trends|sum(attribute='revenue') / (revenue_trends|sum(attribute='orders') or 1))|float) }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tag fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Products Listed</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ product_performance|length }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Chart -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold" style="color: #4E342E !important;">Revenue Trend (12 Months)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: #4E342E !important;">Order Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        {% for status in order_status_breakdown %}
+                        <span class="me-3">
+                            <i class="fas fa-circle {% if status.status == 'completed' %}text-success{% elif status.status == 'processing' %}text-primary{% elif status.status == 'shipped' %}text-info{% elif status.status == 'cancelled' %}text-danger{% else %}text-warning{% endif %}"></i> 
+                            {{ status.status|title }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Revenue</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₱{{ "%.2f"|format(total_revenue|default(0)) }}</div>
+                            <div class="text-xs text-muted mt-1">
+                                <span class="text-success"><i class="fas fa-arrow-up"></i> 12%</span> from last period
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Orders</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_orders|default(0) }}</div>
+                            <div class="text-xs text-muted mt-1">
+                                <span class="text-success"><i class="fas fa-arrow-up"></i> 5%</span> from last period
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Average Order Value</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">₱{{ "%.2f"|format(avg_order_value|default(0)) }}</div>
+                            <div class="text-xs text-muted mt-1">
+                                <span class="text-success"><i class="fas fa-arrow-up"></i> 2.4%</span> from last period
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tag fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total Products</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_products|default(0) }}</div>
+                            <div class="text-xs text-muted mt-1">
+                                <span class="text-success"><i class="fas fa-arrow-up"></i> 3</span> new this month
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Sales Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold" style="color: #4E342E !important;">Sales Overview</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" href="#">This Year</a>
+                            <a class="dropdown-item" href="#">Last Year</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Export Data</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold" style="color: #4E342E !important;">Top Selling Products</h6>
+                </div>
+                <div class="card-body">
+                    {% if top_products %}
+                        {% for product in top_products %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="font-weight-bold">{{ product.name }}</span>
+                                <span class="text-muted small">{{ product.quantity_sold }} sold</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-{{ ['primary', 'success', 'info', 'warning', 'danger'][loop.index0 % 5] }}"
+                                    role="progressbar" 
+                                    style="width: {{ (product.quantity_sold / (top_products[0].quantity_sold or 1)) * 100 }}%"
+                                    aria-valuenow="{{ product.quantity_sold }}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No sales data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold" style="color: #4E342E !important;">Recent Orders</h6>
+                    <a href="{{ url_for('seller.orders') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="recentOrdersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                    <tr>
+                                        <td>#{{ order.id }}</td>
+                                        <td>{{ order.customer_name }}</td>
+                                        <td>{{ order.order_date.strftime('%b %d, %Y') }}</td>
+                                        <td>₱{{ "%.2f"|format(order.total_amount) }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'warning' if order.status == 'pending' else 'primary' if order.status == 'processing' else 'success' if order.status == 'completed' else 'danger' }}">
+                                                {{ order.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('seller.order_details', order_id=order.id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">No recent orders found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script>
+// Sales Chart
+document.addEventListener('DOMContentLoaded', function() {
+    const salesCtx = document.getElementById('salesChart');
+    if (!salesCtx) return;
+    
+    const salesCtx2d = salesCtx.getContext('2d');
+    
+    // Prepare data for the chart
+    const revenueTrends = {{ revenue_trends|tojson|default('[]')|safe }};
+    const salesLabels = revenueTrends.map(item => item.month);
+    const salesData = revenueTrends.map(item => parseFloat(item.revenue || 0));
+
+    // Only initialize chart if we have data
+    if (salesLabels && salesData && salesLabels.length > 0 && salesData.length > 0) {
+        new Chart(salesCtx2d, {
+            type: 'line',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Sales (₱)',
+                    data: salesData,
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointRadius: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointHitRadius: 10,
+                    pointBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                    fill: true
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 14 },
+                        callbacks: {
+                            label: function(context) {
+                                return '₱' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            autoSkipPadding: 10
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₱' + value.toLocaleString();
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        // Show a message if no data is available
+        salesCtx.parentNode.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                <h4>No sales data available</h4>
+                <p class="text-muted">Sales data will appear here once you start making sales.</p>
+            </div>`;
+    }
+
+    // Time range selector
+    const timeRange = document.getElementById('timeRange');
+    if (timeRange) {
+        timeRange.addEventListener('change', function() {
+            const days = this.value;
+            window.location.href = `{{ url_for('seller.analytics') }}?days=${days}`;
+        });
+    }
+});
+
+// Initialize DataTable for recent orders
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('recentOrdersTable');
+    if (table) {
+        new DataTable(table, {
+            pageLength: 5,
+            lengthChange: false,
+            searching: false,
+            ordering: false,
+            info: false
+        });
+    }
+    });
+
+    // Order Status Pie Chart
+    const orderStatusCtx = document.getElementById('orderStatusChart');
+    if (orderStatusCtx) {
+        const statusData = {{ order_status_breakdown|tojson|safe }};
+        const orderStatusData = {
+            labels: statusData.map(item => item.status.charAt(0).toUpperCase() + item.status.slice(1)),
+            datasets: [{
+                data: statusData.map(item => item.count),
+                backgroundColor: [
+                    'rgba(78, 115, 223, 0.8)',
+                    'rgba(28, 200, 138, 0.8)',
+                    'rgba(54, 185, 204, 0.8)',
+                    'rgba(246, 194, 62, 0.8)',
+                    'rgba(231, 74, 59, 0.8)'
+                ],
+                hoverBackgroundColor: [
+                    'rgba(78, 115, 223, 1)',
+                    'rgba(28, 200, 138, 1)',
+                    'rgba(54, 185, 204, 1)',
+                    'rgba(246, 194, 62, 1)',
+                    'rgba(231, 74, 59, 1)'
+                ],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }]
+        };
+
+        new Chart(orderStatusCtx, {
+            type: 'doughnut',
+            data: orderStatusData,
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        backgroundColor: "rgb(255,255,255)",
+                        bodyColor: "#858796",
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        xPadding: 15,
+                        yPadding: 15,
+                        displayColors: false,
+                        caretPadding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '70%',
+            }
+        });
+    }
+});
+</script>
+
+<!-- Add Product Performance and Customer Insights Sections -->
+<div class="row">
+    <!-- Top Products -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold" style="color: #4E342E !important;">Top Selling Products</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Sold</th>
+                                <th>Revenue</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in product_performance[:5] %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>₱{{ "%.2f"|format(product.price|float) }}</td>
+                                <td>{{ product.total_sold or 0 }}</td>
+                                <td>₱{{ "%.2f"|format(product.total_revenue|default(0)|float) }}</td>
+                                <td>
+                                    {% if product.avg_rating %}
+                                        {% for i in range(product.avg_rating|int) %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% endfor %}
+                                        ({{ "%.1f"|format(product.avg_rating|float) }})
+                                    {% else %}
+                                        No reviews
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">No product data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Customers -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold" style="color: #4E342E !important;">Top Customers</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Email</th>
+                                <th>Orders</th>
+                                <th>Total Spent</th>
+                                <th>Last Order</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for customer in customer_insights[:5] %}
+                            <tr>
+                                <td>{{ customer.first_name }} {{ customer.last_name }}</td>
+                                <td>{{ customer.email }}</td>
+                                <td>{{ customer.total_orders }}</td>
+                                <td>₱{{ "%.2f"|format(customer.total_spent|float) }}</td>
+                                <td>{{ customer.last_order_date.strftime('%b %d, %Y') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">No customer data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

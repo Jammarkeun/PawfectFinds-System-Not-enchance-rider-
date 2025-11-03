@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Orders - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-shopping-cart"></i> Order Management</h2>
+                    <p class="text-muted">Monitor all orders across the platform</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select class="form-select" id="statusFilter" onchange="filterOrders()">
+                        <option value="">All Statuses</option>
+                        <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if current_status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="preparing" {% if current_status == 'preparing' %}selected{% endif %}>Preparing</option>
+                        <option value="shipped" {% if current_status == 'shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="on_the_way" {% if current_status == 'on_the_way' %}selected{% endif %}>On the Way</option>
+                        <option value="delivered" {% if current_status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if current_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Seller</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                        <tr>
+                                            <td>
+                                                <strong>#{{ order.id }}</strong>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ order.customer_username }}</strong><br>
+                                                    <small class="text-muted">ID: {{ order.user_id }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ order.seller_username }}</strong><br>
+                                                    <small class="text-muted">ID: {{ order.seller_id }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <strong>${{ "%.2f"|format(order.total_amount) }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 
+                                                    'warning' if order.status == 'pending' else
+                                                    'primary' if order.status == 'confirmed' else
+                                                    'info' if order.status in ['preparing', 'shipped', 'on_the_way'] else
+                                                    'success' if order.status == 'delivered' else
+                                                    'danger' if order.status == 'cancelled' else
+                                                    'secondary'
+                                                }}">
+                                                    {{ order.status.replace('_', ' ').title() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'info' if order.payment_method == 'cod' else 'success' }}">
+                                                    {{ order.payment_method.upper() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    {{ order.created_at.strftime('%m/%d/%Y') }}<br>
+                                                    <small class="text-muted">{{ order.created_at.strftime('%I:%M %p') }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" 
+                                                            data-bs-toggle="dropdown">
+                                                        Actions
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <button class="dropdown-item" onclick="viewOrderDetails({{ order.id }})">
+                                                                <i class="fas fa-eye"></i> View Details
+                                                            </button>
+                                                        </li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        {% if order.status == 'cancelled' %}
+                                                            <li>
+                                                                <form method="POST" action="{{ url_for('admin.restore_order', order_id=order.id) }}" class="d-inline">
+                                                                    {{ csrf_token() }}
+                                                                    <button type="submit" class="dropdown-item text-success">
+                                                                        <i class="fas fa-undo"></i> Restore Order
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        {% endif %}
+                                                        {% if order.status not in ['delivered', 'cancelled'] %}
+                                                            <li>
+                                                                <form method="POST" action="{{ url_for('admin.force_cancel_order', order_id=order.id) }}" class="d-inline"
+                                                                      onsubmit="return confirm('Are you sure you want to force cancel this order?')">
+                                                                    {{ csrf_token() }}
+                                                                    <button type="submit" class="dropdown-item text-danger">
+                                                                        <i class="fas fa-ban"></i> Force Cancel
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        {% endif %}
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No Orders Found</h4>
+                            <p class="text-muted">No orders match the current filters.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- Order details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterOrders() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const url = new URL(window.location.href);
+    url.searchParams.set('status', statusFilter);
+    
+    window.location.href = url.toString();
+}
+
+function viewOrderDetails(orderId) {
+    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+    const content = document.getElementById('orderDetailsContent');
+    
+    // Show loading
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading order details...</p>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Fetch order details (this would typically be an AJAX call)
+    // For now, show placeholder
+    setTimeout(() => {
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-info-circle"></i> Order Information</h6>
+                    <div class="alert alert-info">
+                        <p><strong>Order ID:</strong> #${orderId}</p>
+                        <p><strong>Status:</strong> Processing</p>
+                        <p><strong>Total:</strong> $99.99</p>
+                        <p class="mb-0"><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-user"></i> Customer Details</h6>
+                    <div class="alert alert-secondary">
+                        <p><strong>Name:</strong> John Doe</p>
+                        <p><strong>Email:</strong> john@example.com</p>
+                        <p class="mb-0"><strong>Phone:</strong> +1 (555) 123-4567</p>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-warning">
+                <i class="fas fa-info-circle"></i> 
+                Full order details loading functionality would be implemented here with actual data.
+            </div>
+        `;
+    }, 1000);
+}
+</script>
+{% endblock %}

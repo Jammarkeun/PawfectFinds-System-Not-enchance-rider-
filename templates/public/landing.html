@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block title %}Pawfect Finds - The Purrfect Shop for All Pet Supplies{% endblock %}
+
+{% block content %}
+<style>
+
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-medium: #795548;
+    --brown-light: #D7CCC8;
+    --tan: #EBD5B3;
+    --beige-bg: #FAF3E0;
+    --white: #fff;
+}
+
+body {
+    background: linear-gradient(180deg, var(--beige-bg), #faede2);
+    font-family: 'Poppins', sans-serif;
+    color: var(--brown-dark);
+    overflow-x: hidden;
+    margin: 0;
+    position: relative;
+}
+
+body::before, body::after {
+    content: "";
+    position: fixed;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(93, 64, 55, 0.1), transparent 70%);
+    z-index: 0;
+    filter: blur(40px);
+}
+body::before {
+    top: -150px;
+    right: -100px;
+    animation: float1 6s ease-in-out infinite alternate;
+}
+body::after {
+    bottom: -120px;
+    left: -100px;
+    background: radial-gradient(circle at center, rgba(215, 204, 200, 0.25), transparent 70%);
+    animation: float2 8s ease-in-out infinite alternate-reverse;
+}
+@keyframes float1 {
+    from { transform: translateY(0px); }
+    to { transform: translateY(25px); }
+}
+@keyframes float2 {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-25px); }
+}
+
+header {
+    background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark));
+    color: var(--white);
+    padding: 15px 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 5;
+}
+header .navbar-brand {
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: var(--white) !important;
+}
+header .nav-link {
+    color: var(--tan) !important;
+    font-weight: 500;
+    margin-right: 15px;
+    transition: 0.3s;
+}
+header .nav-link:hover {
+    color: var(--white) !important;
+}
+header .btn {
+    background: var(--tan);
+    color: var(--brown-dark);
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+header .btn:hover {
+    background-color: #e0c9a6;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, var(--tan), var(--brown-light));
+    color: var(--brown-dark);
+    border-radius: 25px;
+    margin: 60px;
+    padding: 60px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+.hero-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('https://www.transparenttextures.com/patterns/white-diamond.png');
+    opacity: 0.15;
+    pointer-events: none;
+}
+.hero-section h1 {
+    font-weight: 700;
+    color: var(--brown-dark);
+}
+.hero-section .btn-light {
+    background-color: var(--white);
+    color: var(--brown-primary);
+    border-radius: 10px;
+    border: none;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+.hero-section .btn-light:hover {
+    background-color: var(--tan);
+    color: var(--brown-dark);
+}
+.hero-section .btn-outline-light {
+    color: var(--brown-dark);
+    border: 2px solid var(--brown-dark);
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.hero-section .btn-outline-light:hover {
+    background-color: var(--brown-dark);
+    color: #fff;
+}
+.hero-section img {
+    width: 85%;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+
+h2 {
+    color: var(--brown-primary);
+    font-weight: 700;
+}
+.lead.text-muted {
+    color: #6d4c41 !important;
+}
+
+.category-card, .product-card {
+    border: none;
+    border-radius: 16px;
+    background-color: var(--white);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    background-color: var(--tan);
+}
+.category-card:hover, .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark));
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 6px 15px rgba(109, 76, 65, 0.3);
+    transition: all 0.3s ease;
+}
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(109, 76, 65, 0.35);
+}
+.btn-outline-primary {
+    color: var(--brown-primary);
+    border: 2px solid var(--brown-primary);
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.btn-outline-primary:hover {
+    background-color: var(--brown-primary);
+    color: #fff;
+}
+
+section {
+    padding-top: 80px;
+    padding-bottom: 80px;
+}
+.bg-light {
+    background-color: #fffaf6 !important;
+}
+section[style*="background-color: var(--brown-primary)"] {
+    background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark)) !important;
+    color: #fff;
+}
+section[style*="background-color: var(--brown-primary)"] .btn-dark {
+    background-color: var(--tan);
+    color: var(--brown-dark);
+    border-radius: 10px;
+}
+section[style*="background-color: var(--brown-primary)"] .btn-outline-dark {
+    border: 2px solid var(--tan);
+    color: var(--tan);
+    border-radius: 10px;
+}
+section[style*="background-color: var(--brown-primary)"] .btn-outline-dark:hover {
+    background-color: var(--tan);
+    color: var(--brown-dark);
+}
+
+footer {
+    background-color: var(--tan);
+    color: var(--brown-dark);
+    text-align: center;
+    padding: 50px 0;
+    border-top: 2px solid #e0c9a6;
+}
+footer a {
+    color: var(--brown-primary);
+    transition: color 0.3s ease;
+}
+footer a:hover {
+    color: var(--brown-dark);
+}
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 mb-4">
+                    <i class="fas fa-paw"></i> Welcome to Pawfect Finds
+                </h1>
+                <p class="lead mb-4">
+                    The purrfect destination for all your pet's needs! From nutritious food to fun toys, 
+                    grooming supplies to health products - we've got everything to keep your pets, 
+                    feathered, and finned friends happy and healthy.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('public.browse_products') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-shopping-bag"></i> Shop Now
+                    </a>
+                    {% if not current_user %}
+                        <a href="{{ url_for('auth.signup') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-user-plus"></i> Join Us
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=600&q=80"
+                     alt="Happy pets" class="img-fluid rounded shadow-lg">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2><i class="fas fa-heart"></i> Shop by Category</h2>
+            <p class="lead text-muted">Find exactly what your pet needs</p>
+        </div>
+        
+        <div class="row g-4">
+            {% for category in categories %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card category-card h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                {% if 'Dog' in category.name %}
+                                    <i class="fas fa-dog fa-3x" style="color:#795548;"></i>
+                                {% elif 'Cat' in category.name %}
+                                    <i class="fas fa-cat fa-3x" style="color:#795548;"></i>
+                                {% elif 'Fish' in category.name or 'Aquarium' in category.name %}
+                                    <i class="fas fa-fish fa-3x" style="color:#795548;"></i>
+                                {% elif 'Bird' in category.name %}
+                                    <i class="fas fa-dove fa-3x" style="color:#795548;"></i>
+                                {% elif 'Grooming' in category.name %}
+                                    <i class="fas fa-cut fa-3x" style="color:#795548;"></i>
+                                {% else %}
+                                    <i class="fas fa-heart fa-3x" style="color:#795548;"></i>
+                                {% endif %}
+                            </div>
+                            <h5 class="card-title">{{ category.name }}</h5>
+                            <p class="card-text text-muted">{{ category.description }}</p>
+                            <a href="{{ url_for('public.category_products', category_id=category.id) }}" 
+                               class="btn btn-primary">
+                                Browse Products
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2><i class="fas fa-star"></i> Featured Products</h2>
+            <p class="lead text-muted">Popular items loved by pets and their owners</p>
+        </div>
+        
+        <div class="row g-4">
+            {% for product in featured_products %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card h-100">
+                        <img src="{{ product.image_url|image_url }}"
+                             class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;"
+                             loading="lazy" decoding="async">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ product.name }}</h6>
+                            <p class="card-text text-muted small flex-grow-1">
+                                {{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong style="color:#5d4037;">${{ "%.2f"|format(product.price) }}</strong>
+                                <small class="text-muted">By {{ product.seller_username }}</small>
+                            </div>
+                            <a href="{{ url_for('public.product_detail', product_id=product.id) }}" 
+                               class="btn btn-primary btn-sm mt-2">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('public.browse_products') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-eye"></i> View All Products
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=80" 
+                     alt="Pet care" class="img-fluid rounded">
+            </div>
+            <div class="col-lg-6">
+                <h2><i class="fas fa-paw"></i> Why Choose Pawfect Finds?</h2>
+                <div class="row mt-4">
+                    <div class="col-sm-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-shield-alt me-3 mt-1" style="color:#795548;"></i>
+                            <div>
+                                <h6>Quality Guaranteed</h6>
+                                <small class="text-muted">Only the best products for your beloved pets</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-shipping-fast me-3 mt-1" style="color:#795548;"></i>
+                            <div>
+                                <h6>Fast Delivery</h6>
+                                <small class="text-muted">Quick and reliable shipping nationwide</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-users me-3 mt-1" style="color:#795548;"></i>
+                            <div>
+                                <h6>Expert Support</h6>
+                                <small class="text-muted">Pet care experts ready to help</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-heart me-3 mt-1" style="color:#795548;"></i>
+                            <div>
+                                <h6>Pet Lovers</h6>
+                                <small class="text-muted">Made by pet lovers, for pet lovers</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('public.about') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-info-circle"></i> Learn More About Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+{% if not current_user %}
+<section class="py-5" style="background-color: var(--brown-primary);">
+    <div class="container text-center">
+        <h2 class="text-light">Ready to Start Shopping?</h2>
+        <p class="lead text-light mb-4">Join thousands of happy pet parents who trust Pawfect Finds</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-dark btn-lg">
+                <i class="fas fa-user-plus"></i> Create Account
+            </a>
+            <a href="{{ url_for('public.browse_products') }}" class="btn btn-outline-dark btn-lg">
+                <i class="fas fa-shopping-bag"></i> Browse Products
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

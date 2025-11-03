@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-light: #A1887F;
+    --beige: #F5EBDD;
+    --white: #FFFFFF;
+}
+
+/* General Styling */
+body {
+    background-color: #f9f5f0;
+    font-family: 'Poppins', sans-serif;
+    color: var(--brown-dark);
+}
+
+/* Breadcrumb */
+.breadcrumb a {
+    color: var(--brown-primary);
+}
+
+.breadcrumb a:hover {
+    color: var(--brown-dark);
+    text-decoration: underline;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    background-color: var(--white);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+/* Card Texts */
+.card-title {
+    color: var(--brown-dark);
+    font-weight: 600;
+}
+
+.card-text {
+    color: var(--brown-light);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--brown-primary);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--brown-dark);
+}
+
+.btn-outline-primary {
+    border-color: var(--brown-primary);
+    color: var(--brown-primary);
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--brown-primary);
+    color: var(--white);
+    box-shadow: 0 2px 6px rgba(109, 76, 65, 0.3);
+}
+
+.btn-outline-secondary {
+    border-color: var(--brown-light);
+    color: var(--brown-light);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--brown-light);
+    color: var(--white);
+}
+
+/* Price Styling */
+.text-primary {
+    color: var(--brown-primary) !important;
+}
+
+/* Badges */
+.badge.bg-primary {
+    background-color: var(--brown-primary) !important;
+}
+
+.badge.bg-success {
+    background-color: #8D6E63 !important;
+}
+
+.badge.bg-danger {
+    background-color: #B71C1C !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--beige);
+    color: var(--brown-dark);
+    border: 1px solid var(--brown-light);
+}
+
+/* Pagination */
+.page-link {
+    color: var(--brown-primary);
+    border-color: var(--brown-light);
+}
+
+.page-item.active .page-link {
+    background-color: var(--brown-primary);
+    border-color: var(--brown-primary);
+}
+
+.page-link:hover {
+    background-color: var(--brown-primary);
+    color: var(--white);
+}
+
+/* Search Bar Styling */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: var(--white);
+    border: 1px solid var(--brown-light);
+    border-radius: 50px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    width: 400px;
+}
+
+.search-bar:hover, .search-bar:focus-within {
+    box-shadow: 0 4px 10px rgba(109, 76, 65, 0.2);
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--brown-dark);
+    background: transparent;
+}
+
+.search-bar input::placeholder {
+    color: var(--brown-light);
+}
+
+.search-bar button {
+    border: none;
+    background-color: var(--brown-primary);
+    color: var(--white);
+    border-radius: 50px;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease;
+}
+
+.search-bar button:hover {
+    background-color: var(--brown-dark);
+}
+
+/* Footer */
+footer .container {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    text-align: center;
+    gap: 20px;
+}
+
+footer .footer-section {
+    flex: 1;
+    min-width: 250px;
+    text-align: center;
+}
+</style>
+
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.landing') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.browse_products') }}">Products</a></li>
+            <li class="breadcrumb-item active">{{ category.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Category Header + Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <h2 class="mb-0 d-flex align-items-center">
+                        <i class="fas fa-tags text-primary me-2"></i>
+                        {{ category.name }}
+                    </h2>
+                    {% if category.description %}
+                        <p class="text-muted mt-2 mb-0">{{ category.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <form method="GET" action="{{ url_for('public.category_products', category_id=category.id) }}" class="m-0">
+                        <div class="search-bar">
+                            <input type="hidden" name="category" value="{{ category.id }}">
+                            <input type="text" name="search" placeholder="Search in {{ category.name }}..." value="{{ search }}">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                    <span class="badge bg-primary">{{ total_products }} products</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ product.image_url|image_url }}"
+                             class="card-img-top" style="height: 200px; object-fit: cover;"
+                             alt="{{ product.name }}" loading="lazy" decoding="async">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ product.name }}</h6>
+                            <p class="card-text small flex-grow-1">{{ product.description[:100] }}...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="h5 text-primary">{{ product.price|apply_discount|php }}</span>
+                                    <small class="text-muted text-decoration-line-through ms-2">{{ product.price|php }}</small>
+                                    <span class="badge bg-success ms-1">₱50 off</span>
+                                    {% if product.stock_quantity > 0 %}
+                                        <span class="badge bg-success ms-2">In Stock</span>
+                                    {% else %}
+                                        <span class="badge bg-danger ms-2">Out of Stock</span>
+                                    {% endif %}
+                                </div>
+                                <a href="{{ url_for('public.product_detail', product_id=product.id) }}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No products found</h4>
+                <p class="text-muted">Try adjusting your search or filters.</p>
+                <a href="{{ url_for('public.category_products', category_id=category.id) }}" 
+                   class="btn btn-outline-primary">
+                    <i class="fas fa-redo"></i> Clear Search
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Product pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('public.category_products', category_id=category.id, page=prev_page, search=search) }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% for page_num in range(1, total_pages + 1) if total_pages <= 5 or (page_num >= current_page - 2 and page_num <= current_page + 2) %}
+                            {% if page_num == current_page %}
+                                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('public.category_products', category_id=category.id, page=page_num, search=search) }}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('public.category_products', category_id=category.id, page=next_page, search=search) }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Back to Top -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('public.browse_products') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to All Products
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-light: #A1887F;
+    --beige: #F5EBDD;
+    --white: #FFFFFF;
+}
+
+/* General Page Styling */
+body {
+    background-color: #f9f5f0; /* soft beige */
+    font-family: 'Poppins', sans-serif;
+    color: var(--brown-dark);
+}
+
+/* Card Styling */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background-color: var(--white);
+}
+
+.card-title, h2, h3, h4, h6 {
+    color: var(--brown-dark);
+    font-weight: bold;
+}
+
+h5 {
+    color: var(--white);
+}
+
+/* Category Badge (Beige Box) */
+.badge.bg-secondary {
+    background-color: var(--beige);
+    color: var(--white);
+    border: 1px solid var(--brown-light);
+    font-weight: bold;
+}
+
+/* Price Styling */
+.text-primary {
+    color: var(--brown-primary) !important;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--brown-primary);
+    border: none;
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--brown-dark);
+    color: var(--white);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--brown-primary);
+    color: var(--brown-primary);
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--brown-primary) !important;
+    border-color: var(--brown-primary) !important;
+    color: var(--white) !important;
+    box-shadow: none !important;
+}
+
+/* Prevent blue focus ring */
+.btn:focus, .btn:active, .btn:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Breadcrumb */
+.breadcrumb a {
+    color: var(--brown-primary);
+}
+
+.breadcrumb a:hover {
+    color: var(--brown-dark);
+    text-decoration: underline;
+}
+
+/* Alerts */
+.alert-info {
+    background-color: var(--beige);
+    color: var(--brown-dark);
+    border: 1px solid var(--brown-light);
+}
+
+/* Product Image — square, smaller, dark brown border */
+.col-md-6:first-child .card {
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.col-md-6:first-child .card-img-top {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    border: 3px solid var(--brown-dark);
+    border-radius: 0;
+}
+
+/* Center the "You May Also Like" section */
+.related-section {
+    text-align: center;
+}
+
+/* FOOTER ALIGNMENT */
+footer .container {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    text-align: center;
+    gap: 20px;
+}
+
+footer .footer-section {
+    flex: 1;
+    min-width: 250px;
+    text-align: center;
+}
+</style>
+
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public.landing') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.browse_products') }}">Products</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public.category_products', category_id=product.category_id) }}">{{ product.category_name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Product Details -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card">
+                <img src="{{ product.image_url|image_url }}" class="card-img-top" alt="{{ product.name }}">
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="card-title">{{ product.name }}</h2>
+                    
+                    {% if rating_info.count > 0 %}
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center">
+                                {% for i in range(5) %}
+                                    <i class="fas fa-star {{ 'text-warning' if i < rating_info.average else 'text-muted' }}"></i>
+                                {% endfor %}
+                                <span class="ms-2">{{ rating_info.average }}/5 ({{ rating_info.count }} reviews)</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <h3 class="text-primary mb-2">{{ product.price|apply_discount|php }}
+                            <small class="text-muted text-decoration-line-through ms-2">{{ product.price|php }}</small>
+                            <span class="badge bg-success ms-1">₱50 off</span>
+                        </h3>
+                        <p class="mb-1">
+                            <span class="badge bg-secondary">{{ product.category_name }}</span>
+                            {% if product.stock_quantity <= 0 %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% elif product.stock_quantity <= 5 %}
+                                <span class="badge bg-warning">Low Stock ({{ product.stock_quantity }} left)</span>
+                            {% else %}
+                                <span class="badge bg-success">In Stock ({{ product.stock_quantity }} available)</span>
+                            {% endif %}
+                        </p>
+                        <p class="text-muted">
+                            <i class="fas fa-store"></i> Sold by <strong>{{ product.seller_username }}</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">{{ product.description or 'No description available.' }}</p>
+                    </div>
+                    
+                    {% if current_user and current_user.role == 'user' %}
+                        {% if product.stock_quantity > 0 %}
+                            <form method="POST" action="{{ url_for('user.add_to_cart') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token_value }}">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-auto">
+                                        <label for="quantity" class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" id="quantity" name="quantity"
+                                               value="1" min="1" max="{{ product.stock_quantity }}" style="width: 80px;">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-danger btn-lg" disabled>
+                                <i class="fas fa-times"></i> Out of Stock
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            {% if not current_user %}
+                                <a href="{{ url_for('auth.login') }}" class="alert-link">Login</a> to add items to your cart.
+                            {% else %}
+                                Only customers can purchase products.
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="fas fa-comments"></i> Customer Reviews</h6>
+                </div>
+                <div class="card-body">
+                    {% if current_user and current_user.role == 'user' %}
+                        <div class="mb-4">
+                            {% if user_review %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i> You have already reviewed this product.
+                                    <div class="mt-2">
+                                        <strong>Your rating:</strong>
+                                        {% for i in range(5) %}
+                                            <i class="fas fa-star {{ 'text-warning' if i < user_review.rating else 'text-muted' }}"></i>
+                                        {% endfor %}
+                                        {% if user_review.comment %}
+                                            <p class="mt-2 mb-0"><em>"{{ user_review.comment }}"</em></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <h6>Add Your Review</h6>
+                                <form method="POST" action="{{ url_for('review.add_review') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token_value }}">
+                                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                                    <div class="row g-3">
+                                        <div class="col-auto">
+                                            <label for="rating" class="form-label">Rating</label>
+                                            <select class="form-select" name="rating" required>
+                                                <option value="">Select...</option>
+                                                <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                                                <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                                                <option value="3">⭐⭐⭐ 3 Stars</option>
+                                                <option value="2">⭐⭐ 2 Stars</option>
+                                                <option value="1">⭐ 1 Star</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="comment" class="form-label">Comment (Optional)</label>
+                                            <input type="text" class="form-control" name="comment" 
+                                                   placeholder="Share your thoughts about this product...">
+                                        </div>
+                                        <div class="col-auto d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-star"></i> Submit Review
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            {% endif %}
+                        </div>
+                        <hr>
+                    {% endif %}
+                    
+                    {% if reviews %}
+                        <div class="reviews-list">
+                            {% for review in reviews %}
+                                <div class="review-item mb-3 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <strong class="me-3">{{ review.first_name }} {{ review.last_name[0] }}.</strong>
+                                                <div class="rating">
+                                                    {% for i in range(5) %}
+                                                        <i class="fas fa-star {{ 'text-warning' if i < review.rating else 'text-muted' }}"></i>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% if review.comment %}
+                                                <p class="mb-0 text-muted">{{ review.comment }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">{{ review.created_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comments fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="row mt-5 related-section">
+        <div class="col-12">
+            <h4><i class="fas fa-heart"></i> You May Also Like</h4>
+            <p class="text-muted">Other products in {{ product.category_name }}</p>
+            <div>
+                <a href="{{ url_for('public.category_products', category_id=product.category_id) }}" 
+                   class="btn btn-outline-primary">
+                    <i class="fas fa-eye"></i> View More in {{ product.category_name }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

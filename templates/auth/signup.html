@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --brown-dark: #4E342E;
+        --brown-primary: #6D4C41;
+        --brown-light: #D7CCC8;
+        --tan: #EBD5B3;
+        --white: #FFFFFF;
+        --beige-bg: #FAF3E0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--beige-bg);
+        color: var(--brown-dark);
+        overflow-x: hidden;
+    }
+
+    .signup-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 120vh;
+        width: 100%;
+    }
+
+    .signup-card {
+        display: flex;
+        flex-direction: row;
+        width: 1000px;
+        max-width: 95%;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .signup-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    /* LEFT SIDE */
+    .signup-logo-section {
+        flex: 1;
+        background: linear-gradient(135deg, var(--tan), var(--brown-light));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .signup-logo-section img {
+        max-width: 250px;
+        width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+    }
+
+    .signup-logo-section h3 {
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: var(--brown-dark);
+    }
+
+    .signup-logo-section p {
+        font-size: 0.9rem;
+        color: #5c4033;
+    }
+
+    /* RIGHT SIDE */
+    .signup-form-section {
+        flex: 1.2;
+        padding: 50px;
+        background: linear-gradient(135deg, var(--white), #fffaf6);
+        overflow-y: auto;
+    }
+
+    .signup-form-section h4 {
+        color: var(--brown-primary);
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .signup-form-section p {
+        color: #7a6252;
+        margin-bottom: 30px;
+        font-size: 0.95rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--brown-dark);
+    }
+
+    .form-control {
+        border: 1px solid #d8c2b2;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #fff;
+    }
+
+    .form-control:focus {
+        border-color: var(--brown-primary);
+        box-shadow: 0 0 0 4px rgba(109, 76, 65, 0.15);
+    }
+
+    .password-container {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--brown-primary);
+        font-size: 1.2rem;
+        transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+        color: var(--brown-dark);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--brown-primary), var(--brown-dark));
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 500;
+        width: 100%;
+        transition: all 0.3s ease;
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(109, 76, 65, 0.25);
+    }
+
+    .text-primary {
+        color: var(--brown-primary) !important;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .text-primary:hover {
+        color: var(--brown-dark) !important;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .signup-card {
+            flex-direction: column;
+            border-radius: 15px;
+        }
+
+        .signup-logo-section {
+            padding: 30px;
+        }
+
+        .signup-logo-section img {
+            max-width: 180px;
+        }
+
+        .signup-form-section {
+            padding: 30px 25px;
+        }
+    }
+</style>
+
+<div class="signup-container">
+    <div class="signup-card shadow">
+        <div class="signup-logo-section">
+            <img src="{{ url_for('static', filename='PF-logo.png') }}" alt="Pawfect Finds Logo">
+            <h3>Pawfect Finds</h3>
+            <p>Because every pet deserves the best care.</p>
+        </div>
+
+        <div class="signup-form-section">
+            <h4><i class="fas fa-user-plus"></i> Create Your Account</h4>
+            <p>Join the Pawfect Finds family today and enjoy a seamless shopping experience for your pets.</p>
+
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-user"></i> First Name</label>
+                        {{ form.first_name(class="form-control", placeholder="Enter your first name") }}
+                        {% for error in form.first_name.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-user"></i> Last Name</label>
+                        {{ form.last_name(class="form-control", placeholder="Enter your last name") }}
+                        {% for error in form.last_name.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-at"></i> Username</label>
+                    {{ form.username(class="form-control", placeholder="Choose a username") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                    {{ form.email(class="form-control", placeholder="Enter your email") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-lock"></i> Password</label>
+                        <div class="password-container">
+                            {{ form.password(class="form-control", placeholder="Create a password", id="password") }}
+                            <i class="fas fa-eye password-toggle" id="toggle-password"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-lock"></i> Confirm Password</label>
+                        <div class="password-container">
+                            {{ form.confirm_password(class="form-control", placeholder="Confirm your password", id="confirm_password") }}
+                            <i class="fas fa-eye password-toggle" id="toggle-confirm-password"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-phone"></i> Phone (Optional)</label>
+                    {{ form.phone(class="form-control", placeholder="Enter your phone number") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-map-marker-alt"></i> Address</label>
+                    {{ form.address(class="form-control", rows="2", placeholder="Enter your address") }}
+                    {% for error in form.address.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-globe"></i> Country</label>
+                        {{ form.country(class="form-control", id="country") }}
+                        {% for error in form.country.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-city"></i> City</label>
+                        <!-- Use a select for city; we keep the WTForms input and sync its value -->
+                        <select class="form-control" id="city_select"></select>
+                        {{ form.city(class="form-control d-none", id="city") }}
+                        {% for error in form.city.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-id-card"></i> ID Picture</label>
+                    {{ form.id_picture(class="form-control", accept="image/*,.pdf") }}
+                    <small class="form-text text-muted">Upload a clear photo of your government-issued ID (JPG, PNG, or PDF)</small>
+                    {% for error in form.id_picture.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                {{ form.submit(class="btn btn-primary mb-3") }}
+
+                <div class="text-center mt-3">
+                    <p class="mb-0">Already have an account?
+                        <a href="{{ url_for('auth.login') }}" class="text-primary">Login here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    if (password !== confirmPassword) {
+        this.setCustomValidity('Passwords do not match');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+// Password toggle functionality
+document.getElementById('toggle-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this;
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+document.getElementById('toggle-confirm-password').addEventListener('click', function() {
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const icon = this;
+
+    if (confirmPasswordInput.type === 'password') {
+        confirmPasswordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        confirmPasswordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+// Country/City dynamic dropdown + auto-fill address
+(function(){
+    const countryEl = document.getElementById('country');
+    const citySelect = document.getElementById('city_select');
+    const cityInput = document.getElementById('city');
+    const addressEl = document.getElementById('address') || document.querySelector('textarea[name="address"]');
+
+    function setAddress(){
+        if(addressEl && countryEl && citySelect.value){
+            addressEl.value = `${citySelect.value}, ${countryEl.value}`;
+        }
+        if(cityInput){ cityInput.value = citySelect.value; }
+    }
+
+    async function loadCountries(){
+        try{
+            const res = await fetch('https://restcountries.com/v3.1/all?fields=name');
+            const data = await res.json();
+            const names = data.map(c => c.name.common).sort((a,b)=>a.localeCompare(b));
+            // Preserve current selection if any
+            const current = countryEl.value;
+            countryEl.innerHTML = names.map(n=>`<option value="${n}">${n}</option>`).join('');
+            if(current){ countryEl.value = current; }
+        }catch(e){ /* fallback to existing options */ }
+    }
+
+    async function loadCities(country){
+        citySelect.innerHTML = '<option value="">Loading cities...</option>';
+        try{
+            const res = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ country })
+            });
+            const data = await res.json();
+            const cities = (data.data || []).sort((a,b)=>a.localeCompare(b));
+            citySelect.innerHTML = '<option value="">Select city</option>' + cities.map(c=>`<option value="${c}">${c}</option>`).join('');
+        }catch(e){
+            citySelect.innerHTML = '<option value="">Select city</option>';
+        }
+        setAddress();
+    }
+
+    if(countryEl){
+        loadCountries().then(()=> loadCities(countryEl.value || 'Philippines'));
+        countryEl.addEventListener('change', ()=> loadCities(countryEl.value));
+    }
+    if(citySelect){
+        citySelect.addEventListener('change', setAddress);
+    }
+})();
+</script>
+{% endblock %}

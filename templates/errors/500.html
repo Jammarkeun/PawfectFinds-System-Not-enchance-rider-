@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Pawfect Finds{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row min-vh-100 align-items-center">
+        <div class="col-lg-8 mx-auto text-center">
+            <!-- Error Illustration -->
+            <div class="mb-5">
+                <i class="fas fa-exclamation-triangle fa-5x text-danger mb-4"></i>
+                <div class="position-relative d-inline-block">
+                    <h1 class="display-1 text-danger fw-bold">500</h1>
+                    <div class="position-absolute top-0 start-100 translate-middle">
+                        <i class="fas fa-paw fa-3x text-warning" style="transform: rotate(-15deg);"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error Message -->
+            <div class="mb-5">
+                <h2 class="h3 mb-3">Oops! Something went wrong on our end.</h2>
+                <p class="lead text-muted mb-4">
+                    We're sorry, but our servers are having a ruff time right now. Our team has been notified and is working to fix the issue. Please try again in a few minutes.
+                </p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-home"></i> Go Home
+                        </a>
+                        <button onclick="window.location.reload()" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-redo"></i> Try Again
+                        </button>
+                        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h5 class="mb-3">
+                                <i class="fas fa-question-circle text-info"></i> 
+                                What can you do?
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-refresh text-success me-2"></i>
+                                            Refresh the page
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-clock text-warning me-2"></i>
+                                            Wait a few minutes and try again
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-home text-primary me-2"></i>
+                                            Return to the homepage
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-envelope text-info me-2"></i>
+                                            <a href="{{ url_for('contact') }}" class="text-decoration-none">Contact our support team</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error ID (for support) -->
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="alert alert-secondary" role="alert">
+                        <small>
+                            <strong>Error Reference:</strong> 
+                            <code>ERR-{{ moment().format('YYYYMMDDHHmmss') }}-{{ range(1000, 9999) | random }}</code><br>
+                            <em>Please include this reference when contacting support.</em>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Updates Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h4 class="mb-4">
+                    <i class="fas fa-info-circle text-primary"></i> 
+                    Stay Updated
+                </h4>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-transparent">
+                            <div class="card-body">
+                                <i class="fab fa-twitter fa-2x text-info mb-3"></i>
+                                <p class="small">Follow us on Twitter for real-time updates</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-transparent">
+                            <div class="card-body">
+                                <i class="fas fa-bell fa-2x text-warning mb-3"></i>
+                                <p class="small">Sign up for status notifications via email</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-transparent">
+                            <div class="card-body">
+                                <i class="fas fa-tools fa-2x text-success mb-3"></i>
+                                <p class="small">Our team is working around the clock to fix this</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+}
+
+.alert-secondary {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+</style>
+
+<script>
+// Auto-refresh after 30 seconds
+setTimeout(function() {
+    if (confirm('Would you like to try reloading the page? The issue might be resolved.')) {
+        window.location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --brown-dark: #4E342E;
+        --brown-primary: #6D4C41;
+        --brown-light: #D7CCC8;
+        --tan: #EBD5B3;
+        --white: #FFFFFF;
+        --beige-bg: #FAF3E0;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--beige-bg);
+        color: var(--brown-dark);
+        overflow-x: hidden;
+    }
+
+    .signup-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 120vh;
+        width: 100%;
+    }
+
+    .signup-card {
+        display: flex;
+        flex-direction: row;
+        width: 1000px;
+        max-width: 95%;
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .signup-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+
+    /* LEFT SIDE */
+    .signup-logo-section {
+        flex: 1;
+        background: linear-gradient(135deg, var(--tan), var(--brown-light));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .signup-logo-section img {
+        max-width: 250px;
+        width: 100%;
+        height: auto;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+    }
+
+    .signup-logo-section h3 {
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: var(--brown-dark);
+    }
+
+    .signup-logo-section p {
+        font-size: 0.9rem;
+        color: #5c4033;
+    }
+
+    /* RIGHT SIDE */
+    .signup-form-section {
+        flex: 1.5;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .step.active {
+        background-color: var(--brown-primary);
+        color: white;
+    }
+
+    .step.completed {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .step-line {
+        width: 40px;
+        height: 2px;
+        background-color: #e9ecef;
+        margin-top: 19px;
+    }
+
+    .step-line.completed {
+        background-color: #28a745;
+    }
+
+    .form-step {
+        display: none;
+    }
+
+    .form-step.active {
+        display: block;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--brown-dark);
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--brown-primary);
+        box-shadow: 0 0 0 0.2rem rgba(109, 76, 65, 0.25);
+    }
+
+    .btn-primary {
+        background-color: var(--brown-primary);
+        border-color: var(--brown-primary);
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--brown-dark);
+        border-color: var(--brown-dark);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        border-radius: 10px;
+        padding: 12px 30px;
+        font-weight: 600;
+    }
+
+    .password-container {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+
+    .password-toggle:hover {
+        color: var(--brown-primary);
+    }
+
+    .text-primary {
+        color: var(--brown-primary) !important;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .text-primary:hover {
+        color: var(--brown-dark) !important;
+        text-decoration: underline;
+    }
+
+    .otp-input {
+        text-align: center;
+        font-size: 1.5rem;
+        letter-spacing: 0.5rem;
+        font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+        .signup-card {
+            flex-direction: column;
+            border-radius: 15px;
+        }
+
+        .signup-logo-section {
+            padding: 30px;
+        }
+
+        .signup-logo-section img {
+            max-width: 180px;
+        }
+
+        .signup-form-section {
+            padding: 30px 25px;
+        }
+    }
+</style>
+
+<div class="signup-container">
+    <div class="signup-card shadow">
+        <div class="signup-logo-section">
+            <img src="{{ url_for('static', filename='PF-logo.png') }}" alt="Pawfect Finds Logo">
+            <h3>Pawfect Finds</h3>
+            <p>Because every pet deserves the best care.</p>
+        </div>
+
+        <div class="signup-form-section">
+            <h4><i class="fas fa-user-plus"></i> Create Your Account</h4>
+            <p>Join the Pawfect Finds family today and enjoy a seamless shopping experience for your pets.</p>
+
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" id="step1-indicator">1</div>
+                <div class="step-line" id="line1"></div>
+                <div class="step" id="step2-indicator">2</div>
+                <div class="step-line" id="line2"></div>
+                <div class="step" id="step3-indicator">3</div>
+            </div>
+
+            <form method="POST" id="signupForm" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <!-- Step 1: Personal Information -->
+                <div class="form-step active" id="step1">
+                    <h5 class="mb-4">Personal Information</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-user"></i> First Name</label>
+                            {{ form.first_name(class="form-control", placeholder="Enter your first name", id="first_name") }}
+                            {% for error in form.first_name.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-user"></i> Last Name</label>
+                            {{ form.last_name(class="form-control", placeholder="Enter your last name", id="last_name") }}
+                            {% for error in form.last_name.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                        {{ form.email(class="form-control", placeholder="Enter your email", id="email") }}
+                        {% for error in form.email.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-lock"></i> Password</label>
+                            <div class="password-container">
+                                {{ form.password(class="form-control", placeholder="Create a password", id="password") }}
+                                <i class="fas fa-eye password-toggle" id="toggle-password"></i>
+                            </div>
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-lock"></i> Confirm Password</label>
+                            <div class="password-container">
+                                {{ form.confirm_password(class="form-control", placeholder="Confirm your password", id="confirm_password") }}
+                                <i class="fas fa-eye password-toggle" id="toggle-confirm-password"></i>
+                            </div>
+                            {% for error in form.confirm_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary" id="nextStep1">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Contact & Location -->
+                <div class="form-step" id="step2">
+                    <h5 class="mb-4">Contact & Location</h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-phone"></i> Phone Number</label>
+                        {{ form.phone(class="form-control", placeholder="Enter your phone number", id="phone") }}
+                        {% for error in form.phone.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-globe"></i> Country</label>
+                            {{ form.country(class="form-control", id="country") }}
+                            {% for error in form.country.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-city"></i> City</label>
+                            <select class="form-control" id="city_select"></select>
+                            {{ form.city(class="form-control d-none", id="city") }}
+                            {% for error in form.city.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-map-marker-alt"></i> Address</label>
+                        {{ form.address(class="form-control", rows="3", placeholder="Enter your complete address", id="address") }}
+                        {% for error in form.address.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="prevStep2"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextStep2">Next <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- Step 3: ID Verification -->
+                <div class="form-step" id="step3">
+                    <h5 class="mb-4">ID Verification</h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-id-card"></i> ID Picture</label>
+                        {{ form.id_picture(class="form-control", accept="image/*,.pdf", id="id_picture") }}
+                        <small class="form-text text-muted">Upload a clear photo of your government-issued ID (JPG, PNG, or PDF)</small>
+                        {% for error in form.id_picture.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary" id="prevStep3"><i class="fas fa-arrow-left"></i> Previous</button>
+                        {{ form.submit(class="btn btn-primary", id="submitBtn") }}
+                    </div>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <p class="mb-0">Already have an account?
+                    <a href="{{ url_for('auth.login') }}" class="text-primary">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Multi-step form functionality
+let currentStep = 1;
+const totalSteps = 3;
+
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    
+    // Show current step
+    document.getElementById(`step${step}`).classList.add('active');
+    
+    // Update step indicators
+    for (let i = 1; i <= totalSteps; i++) {
+        const indicator = document.getElementById(`step${i}-indicator`);
+        const line = document.getElementById(`line${i-1}`);
+        
+        if (i < step) {
+            indicator.classList.add('completed');
+            indicator.classList.remove('active');
+            if (line) line.classList.add('completed');
+        } else if (i === step) {
+            indicator.classList.add('active');
+            indicator.classList.remove('completed');
+        } else {
+            indicator.classList.remove('active', 'completed');
+            if (line) line.classList.remove('completed');
+        }
+    }
+}
+
+function validateStep(step) {
+    const stepElement = document.getElementById(`step${step}`);
+    const requiredFields = stepElement.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            isValid = false;
+            field.classList.add('is-invalid');
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+    
+    // Special validation for step 1
+    if (step === 1) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        
+        if (password !== confirmPassword) {
+            document.getElementById('confirm_password').classList.add('is-invalid');
+            isValid = false;
+        }
+    }
+    
+    return isValid;
+}
+
+// Step navigation
+document.getElementById('nextStep1').addEventListener('click', function() {
+    if (validateStep(1)) {
+        currentStep = 2;
+        showStep(currentStep);
+    }
+});
+
+document.getElementById('nextStep2').addEventListener('click', function() {
+    if (validateStep(2)) {
+        currentStep = 3;
+        showStep(currentStep);
+    }
+});
+
+document.getElementById('prevStep2').addEventListener('click', function() {
+    currentStep = 1;
+    showStep(currentStep);
+});
+
+document.getElementById('prevStep3').addEventListener('click', function() {
+    currentStep = 2;
+    showStep(currentStep);
+});
+
+// Password toggle functionality
+document.getElementById('toggle-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this;
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+document.getElementById('toggle-confirm-password').addEventListener('click', function() {
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const icon = this;
+
+    if (confirmPasswordInput.type === 'password') {
+        confirmPasswordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        confirmPasswordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+// Country/City dynamic dropdown + auto-fill address
+(function(){
+    const countryEl = document.getElementById('country');
+    const citySelect = document.getElementById('city_select');
+    const cityInput = document.getElementById('city');
+    const addressEl = document.getElementById('address');
+
+    function setAddress(){
+        if(addressEl && countryEl && citySelect.value){
+            addressEl.value = `${citySelect.value}, ${countryEl.value}`;
+        }
+        if(cityInput){ cityInput.value = citySelect.value; }
+    }
+
+    async function loadCountries(){
+        try{
+            const res = await fetch('https://restcountries.com/v3.1/all?fields=name');
+            const data = await res.json();
+            const names = data.map(c => c.name.common).sort((a,b)=>a.localeCompare(b));
+            const current = countryEl.value;
+            countryEl.innerHTML = names.map(n=>`<option value="${n}">${n}</option>`).join('');
+            if(current){ countryEl.value = current; }
+        }catch(e){ /* fallback to existing options */ }
+    }
+
+    async function loadCities(country){
+        citySelect.innerHTML = '<option value="">Loading cities...</option>';
+        try{
+            const res = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ country })
+            });
+            const data = await res.json();
+            const cities = (data.data || []).sort((a,b)=>a.localeCompare(b));
+            citySelect.innerHTML = '<option value="">Select city</option>' + cities.map(c=>`<option value="${c}">${c}</option>`).join('');
+        }catch(e){
+            citySelect.innerHTML = '<option value="">Select city</option>';
+        }
+        setAddress();
+    }
+
+    if(countryEl){
+        loadCountries().then(()=> loadCities(countryEl.value || 'Philippines'));
+        countryEl.addEventListener('change', ()=> loadCities(countryEl.value));
+    }
+    if(citySelect){
+        citySelect.addEventListener('change', setAddress);
+    }
+})();
+
+// Form submission
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+    if (!validateStep(3)) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

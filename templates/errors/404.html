@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - Pawfect Finds{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row min-vh-100 align-items-center">
+        <div class="col-lg-8 mx-auto text-center">
+            <!-- Error Illustration -->
+            <div class="mb-5">
+                <i class="fas fa-search fa-5x text-muted mb-4"></i>
+                <div class="position-relative d-inline-block">
+                    <h1 class="display-1 text-primary fw-bold">404</h1>
+                    <div class="position-absolute top-0 start-100 translate-middle">
+                        <i class="fas fa-paw fa-3x text-warning" style="transform: rotate(15deg);"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Error Message -->
+            <div class="mb-5">
+                <h2 class="h3 mb-3">Oops! This page went for a walk and didn't come back.</h2>
+                <p class="lead text-muted mb-4">
+                    The page you're looking for might have been moved, deleted, or you entered the wrong URL. 
+                    Don't worry though, we'll help you find what you're looking for!
+                </p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-home"></i> Go Home
+                        </a>
+                        <a href="{{ url_for('public.browse_products') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-shopping-bag"></i> Browse Products
+                        </a>
+                        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Go Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-6">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <h5 class="mb-3">
+                                <i class="fas fa-search text-primary"></i> 
+                                Search for what you need
+                            </h5>
+                            <form action="{{ url_for('search.search_products') }}" method="GET">
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control-lg" 
+                                           name="q" placeholder="Search for pet products...">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Popular Categories -->
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <h5 class="mb-4 text-muted">Popular Categories</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <a href="{{ url_for('search.search_products', q='food') }}" class="text-decoration-none">
+                                <div class="card border-0 shadow-sm h-100 hover-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-bone fa-2x text-primary mb-2"></i>
+                                        <h6 class="mb-0">Pet Food</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <a href="{{ url_for('search.search_products', q='toys') }}" class="text-decoration-none">
+                                <div class="card border-0 shadow-sm h-100 hover-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-futbol fa-2x text-success mb-2"></i>
+                                        <h6 class="mb-0">Toys</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <a href="{{ url_for('search.search_products', q='accessories') }}" class="text-decoration-none">
+                                <div class="card border-0 shadow-sm h-100 hover-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-tshirt fa-2x text-warning mb-2"></i>
+                                        <h6 class="mb-0">Accessories</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <a href="{{ url_for('search.search_products', q='health') }}" class="text-decoration-none">
+                                <div class="card border-0 shadow-sm h-100 hover-card">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                                        <h6 class="mb-0">Health & Care</h6>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fun Pet Facts Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h4 class="mb-4">
+                    <i class="fas fa-lightbulb text-warning"></i> 
+                    While you're here, did you know?
+                </h4>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-transparent">
+                            <div class="card-body">
+                                <i class="fas fa-dog fa-2x text-primary mb-3"></i>
+                                <p class="small">Dogs have a sense of time and can predict when their owners are coming home!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-transparent">
+                            <div class="card-body">
+                                <i class="fas fa-cat fa-2x text-info mb-3"></i>
+                                <p class="small">Cats can make over 100 different sounds, while dogs can only make about 10!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-transparent">
+                            <div class="card-body">
+                                <i class="fas fa-paw fa-2x text-success mb-3"></i>
+                                <p class="small">Pet owners are less likely to suffer from depression than those without pets!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}

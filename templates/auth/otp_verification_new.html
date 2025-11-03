@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - Pawfect Finds</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6D4C41;
+            --primary-dark: #4E342E;
+            --primary-light: #D7CCC8;
+            --accent: #E8C07D;
+            --light-bg: #FAF3E0;
+            --white: #FFFFFF;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #E0E0E0;
+            --error: #E74C3C;
+            --success: #27AE60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .verification-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .verification-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .verification-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+        }
+
+        .verification-content {
+            padding: 40px;
+        }
+
+        .verification-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .verification-subtitle {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .otp-input-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0 40px;
+            gap: 10px;
+        }
+
+        .otp-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .otp-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(109, 76, 65, 0.2);
+            outline: none;
+        }
+
+        .btn-verify {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .btn-verify:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-verify:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .resend-otp {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        #resendBtn {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+        }
+
+        #resendBtn:hover {
+            text-decoration: underline;
+        }
+
+        #resendBtn:disabled {
+            color: #999;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
+        .countdown {
+            display: inline-block;
+            min-width: 30px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-message {
+            background-color: #FDEDED;
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+
+        .success-message {
+            background-color: #EDF7EE;
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .verification-content {
+                padding: 30px 20px;
+            }
+            
+            .otp-input {
+                width: 40px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <div class="verification-header">
+            <div class="verification-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="logo">Pawfect Finds</div>
+            <div class="tagline">Your One-Stop Pet Shop</div>
+        </div>
+        
+        <div class="verification-content">
+            <h1 class="verification-title">Verify Your Email</h1>
+            <p class="verification-subtitle">We've sent a 6-digit verification code to<br><strong>{{ email }}</strong></p>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message {{ category }}-message">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form id="otpForm" method="POST">
+                <div class="otp-input-container">
+                    <input type="text" class="otp-input" maxlength="1" pattern="\d" inputmode="numeric" required autofocus>
+                    <input type="text" class="otp-input" maxlength="1" pattern="\d" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="\d" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="\d" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="\d" inputmode="numeric" required>
+                    <input type="text" class="otp-input" maxlength="1" pattern="\d" inputmode="numeric" required>
+                    <input type="hidden" name="otp" id="otpInput">
+                </div>
+                
+                <button type="submit" class="btn-verify" id="verifyBtn" disabled>Verify Email</button>
+                
+                <p class="resend-otp">
+                    Didn't receive the code? 
+                    <button type="button" id="resendBtn" onclick="resendOTP()">Resend OTP</button>
+                    <span id="countdown" class="countdown"></span>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const inputs = document.querySelectorAll('.otp-input');
+        const form = document.getElementById('otpForm');
+        const otpInput = document.getElementById('otpInput');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const resendBtn = document.getElementById('resendBtn');
+        const countdownEl = document.getElementById('countdown');
+        
+        // Handle OTP input
+        inputs.forEach((input, index) => {
+            // Allow only numbers
+            input.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                
+                // Move to next input on number input
+                if (e.target.value.length === 1) {
+                    if (index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    } else {
+                        // Last input, update OTP value
+                        updateOTPValue();
+                    }
+                }
+                
+                // Enable verify button if all fields are filled
+                const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+                verifyBtn.disabled = !allFilled;
+            });
+            
+            // Handle backspace
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+            
+            // Handle paste
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const numbers = paste.replace(/[^0-9]/g, '');
+                
+                if (numbers.length === 6) {
+                    numbers.split('').forEach((num, i) => {
+                        if (inputs[i]) {
+                            inputs[i].value = num;
+                        }
+                    });
+                    updateOTPValue();
+                    verifyBtn.disabled = false;
+                    inputs[5].focus();
+                }
+            });
+        });
+        
+        // Update hidden input with OTP value
+        function updateOTPValue() {
+            let otp = '';
+            inputs.forEach(input => {
+                otp += input.value;
+            });
+            otpInput.value = otp;
+            return otp.length === 6;
+        }
+        
+        // Form submission
+        form.addEventListener('submit', (e) => {
+            if (!updateOTPValue()) {
+                e.preventDefault();
+                return false;
+            }
+            // Show loading state
+            verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            verifyBtn.disabled = true;
+        });
+        
+        // Countdown timer
+        let timeLeft = 60;
+        let countdownInterval;
+        
+        function startCountdown() {
+            resendBtn.disabled = true;
+            clearInterval(countdownInterval);
+            
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                updateCountdownText();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    resendBtn.disabled = false;
+                    countdownEl.textContent = '';
+                }
+            }, 1000);
+            
+            updateCountdownText();
+        }
+        
+        function updateCountdownText() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownEl.textContent = `(${minutes}:${seconds < 10 ? '0' + seconds : seconds})`;
+        }
+        
+        // Start countdown on page load
+        startCountdown();
+        
+        // Resend OTP
+        function resendOTP() {
+            const email = '{{ email }}';
+            
+            // Show loading state
+            const originalText = resendBtn.innerHTML;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            resendBtn.disabled = true;
+            
+            fetch('{{ url_for("auth.resend_otp") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `email=${encodeURIComponent(email)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reset countdown
+                    timeLeft = 60;
+                    startCountdown();
+                    
+                    // Show success message
+                    showMessage('New OTP sent successfully!', 'success');
+                } else {
+                    showMessage(data.message || 'Failed to resend OTP. Please try again.', 'error');
+                    resendBtn.disabled = false;
+                }
+                
+                resendBtn.innerHTML = originalText;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'error');
+                resendBtn.innerHTML = originalText;
+                resendBtn.disabled = false;
+            });
+            
+            return false;
+        }
+        
+        // Show message function
+        function showMessage(message, type) {
+            // Remove any existing messages
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            // Create new message element
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${type}-message`;
+            messageEl.textContent = message;
+            
+            // Insert after the subtitle
+            const subtitle = document.querySelector('.verification-subtitle');
+            subtitle.parentNode.insertBefore(messageEl, subtitle.nextSibling);
+            
+            // Auto-remove message after 5 seconds
+            setTimeout(() => {
+                messageEl.style.opacity = '0';
+                messageEl.style.transform = 'translateY(-10px)';
+                setTimeout(() => messageEl.remove(), 300);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add New User - Admin Panel{% endblock %}
+
+{% block admin_content %}
+<!-- Header -->
+<header class="dashboard-header">
+    <div>
+        <h1><i class="fas fa-user-plus"></i> Add New User</h1>
+        <p style="color: var(--accent-brown); margin: 5px 0 0 0;">Create a new user account</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Users
+        </a>
+    </div>
+</header>
+
+<!-- Content Grid -->
+<div class="content-grid">
+    <!-- Main Content -->
+    <div class="main-section">
+        <!-- Add User Form -->
+        <section class="quick-actions">
+            <h3><i class="fas fa-user-plus"></i> User Information</h3>
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.add_user') }}">
+                        {{ form.csrf_token }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.first_name.label(class="form-label") }}
+                                    {{ form.first_name(class="form-control") }}
+                                    {% if form.first_name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.first_name.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.last_name.label(class="form-label") }}
+                                    {{ form.last_name(class="form-control") }}
+                                    {% if form.last_name.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.last_name.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.username.label(class="form-label") }}
+                                    {{ form.username(class="form-control") }}
+                                    {% if form.username.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.username.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.email.label(class="form-label") }}
+                                    {{ form.email(class="form-control") }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.email.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.password.label(class="form-label") }}
+                                    {{ form.password(class="form-control") }}
+                                    {% if form.password.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.password.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.confirm_password.label(class="form-label") }}
+                                    {{ form.confirm_password(class="form-control") }}
+                                    {% if form.confirm_password.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.confirm_password.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.phone.label(class="form-label") }}
+                                    {{ form.phone(class="form-control") }}
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.phone.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Role</label>
+                                    <select class="form-control" name="role" id="role">
+                                        <option value="user">Customer</option>
+                                        <option value="seller">Seller</option>
+                                        <option value="rider">Rider</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.address.label(class="form-label") }}
+                            {{ form.address(class="form-control", rows="3") }}
+                            {% if form.address.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.address.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Create User
+                            </button>
+                            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Sidebar Widgets -->
+    <div class="sidebar-widgets">
+        <!-- User Creation Tips -->
+        <section class="system-status">
+            <h4><i class="fas fa-lightbulb"></i> User Creation Tips</h4>
+            <ul class="list-unstyled">
+                <li><i class="fas fa-check text-success"></i> Use a strong password</li>
+                <li><i class="fas fa-check text-success"></i> Provide accurate contact information</li>
+                <li><i class="fas fa-check text-success"></i> Choose appropriate role based on user type</li>
+                <li><i class="fas fa-check text-success"></i> Username should be unique and memorable</li>
+            </ul>
+        </section>
+
+        <!-- Recent Users -->
+        <section class="system-status">
+            <h4><i class="fas fa-users"></i> Recent Users</h4>
+            {% if recent_users %}
+                {% for user in recent_users[:5] %}
+                <div class="status-item">
+                    <span class="status-label">{{ user.first_name }} {{ user.last_name }}</span>
+                    <span class="status-value">{{ user.created_at.strftime('%m/%d') if user.created_at else 'N/A' }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No recent users</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

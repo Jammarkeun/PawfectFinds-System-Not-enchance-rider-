@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Products - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-light: #A1887F;
+    --beige: #F5EBDD;
+    --white: #FFFFFF;
+}
+
+/* General Styling */
+body {
+    background-color: #f9f5f0;
+    font-family: 'Poppins', sans-serif;
+    color: var(--brown-dark);
+}
+
+/* Container */
+.products-container {
+    max-width: 1200px;
+    background: var(--white);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+    margin: 2rem auto;
+}
+
+/* Headings */
+h2 {
+    color: var(--brown-dark);
+    font-weight: 600;
+}
+
+.text-muted {
+    color: #5c4033 !important;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    background-color: var(--white);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--brown-primary);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--brown-dark);
+}
+
+.btn-outline-secondary {
+    border-color: var(--brown-light);
+    color: var(--brown-light);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--brown-light);
+    color: var(--white);
+}
+
+/* ✅ Search Bar Styling (from your reference) */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: var(--white);
+    border: 1.5px solid var(--brown-dark);
+    border-radius: 50px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 640px;
+}
+
+.search-bar:hover, .search-bar:focus-within {
+    box-shadow: 0 4px 10px rgba(109, 76, 65, 0.2);
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 16px;
+    color: var(--brown-dark);
+    background: transparent;
+}
+
+.search-bar input::placeholder {
+    color: var(--brown-light);
+}
+
+.search-bar button {
+    border: none;
+    background-color: var(--brown-primary);
+    color: var(--white);
+    border-radius: 50px;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+}
+
+.search-bar button:hover {
+    background-color: var(--brown-dark);
+}
+
+/* Category Dropdown */
+.form-select {
+    border-radius: 50px;
+    border: 1.5px solid var(--brown-dark);
+    padding: 10px 23px;
+}
+
+.form-select:focus {
+    border-color: var(--brown-primary);
+    box-shadow: 0 0 6px rgba(109, 76, 65, 0.3);
+}
+
+/* Footer */
+footer {
+    background: var(--white);
+    color: var(--brown-dark);
+    padding: 1rem 0;
+    text-align: center;
+    margin-top: 2rem;
+}
+</style>
+
+<div class="products-container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-shopping-bag"></i> Pet Products</h2>
+            <p class="text-muted">Find the perfect products for your furry friends</p>
+        </div>
+    </div>
+
+    <!-- ✅ Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="GET" class="d-flex flex-wrap align-items-end gap-3">
+                        <div class="search-bar">
+                            <input type="text" id="search" name="search"
+                                   value="{{ search or '' }}" placeholder="Search products...">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+
+                        <div class="category-col">
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {{ 'selected' if category_id == cat.id }}>
+                                        {{ cat.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="buttons-col">
+                            <a href="{{ url_for('public.browse_products') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+                    <div class="card product-card h-100">
+                        <img src="{{ product.image_url|image_url }}"
+                             class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;"
+                             loading="lazy" decoding="async">
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ product.name }}</h6>
+                            <p class="card-text text-muted small flex-grow-1">
+                                {{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}
+                            </p>
+                            
+                            <div class="mb-2">
+                                <span class="badge bg-secondary">{{ product.category_name }}</span>
+                                {% if product.stock_quantity <= 0 %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% elif product.stock_quantity <= 5 %}
+                                    <span class="badge bg-warning">Low Stock</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong class="text-primary h5">{{ product.price|apply_discount|php }}</strong>
+                                    <small class="text-muted text-decoration-line-through ms-2">{{ product.price|php }}</small>
+                                </div>
+                                <small class="text-muted">By {{ product.seller_username }}</small>
+                            </div>
+                            
+                            <div class="mt-auto">
+                                <a href="{{ url_for('public.product_detail', product_id=product.id) }}" 
+                                   class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Products Found</h4>
+                    <p class="text-muted">
+                        {% if search or category_id %}
+                            Try adjusting your search or filter criteria.
+                        {% else %}
+                            No products available at the moment.
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('public.browse_products') }}" class="btn btn-primary">
+                        <i class="fas fa-refresh"></i> View All Products
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Product pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('public.browse_products', 
+                                    page=prev_page, search=search, category=category_id) }}">
+                                    <i class="fas fa-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ current_page }} of {{ total_pages }}
+                            </span>
+                        </li>
+                        
+                        {% if has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('public.browse_products', 
+                                    page=next_page, search=search, category=category_id) }}">
+                                    Next <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

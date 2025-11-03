@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - Pawfect Finds{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --brown-dark: #4E342E;
+    --brown-primary: #6D4C41;
+    --brown-light: #A1887F;
+    --beige: #F5E9DC;
+    --white: #FFFFFF;
+}
+
+body {
+    background-color: var(--beige);
+    color: var(--brown-dark);
+
+}
+
+h2 {
+    color: var(--brown-dark);
+    margin-top: 10px;
+}
+
+h5, h6 {
+    color: var(--white);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: var(--white);
+}
+
+.card-header {
+    background-color: var(--brown-primary);
+    color: var(--white);
+    border-radius: 10px 10px 0 0;
+}
+
+.card-body {
+    background-color: var(--white);
+    color: var(--brown-dark);
+}
+
+.text-muted {
+    color: var(--brown-light) !important;
+}
+
+.btn-primary {
+    background-color: var(--brown-primary);
+    border-color: var(--brown-primary);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--brown-dark);
+    border-color: var(--brown-dark);
+}
+
+.btn-outline-primary {
+    color: var(--brown-primary);
+    border-color: var(--brown-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--brown-primary);
+    color: var(--white);
+}
+
+.btn-outline-danger {
+    border-color: #c62828;
+    color: #c62828;
+}
+
+.btn-outline-danger:hover {
+    background-color: #c62828;
+    color: #fff;
+}
+
+.input-group .btn-outline-secondary {
+    color: var(--brown-primary);
+    border-color: var(--brown-light);
+}
+
+.input-group .btn-outline-secondary:hover {
+    background-color: var(--brown-light);
+    color: var(--white);
+}
+
+.form-control {
+    border-color: var(--brown-light);
+}
+
+.form-control:focus {
+    border-color: var(--brown-primary);
+    box-shadow: 0 0 5px rgba(109, 76, 65, 0.3);
+}
+
+hr {
+    border-top: 1px solid var(--brown-light);
+}
+
+.text-primary {
+    color: var(--brown-primary) !important;
+}
+
+.btn-lg {
+    border-radius: 8px;
+}
+
+a {
+    text-decoration: none;
+}
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-shopping-cart"></i> Your Shopping Cart</h2>
+            <p class="text-muted">Review your items before checkout</p>
+        </div>
+    </div>
+    
+    {% if cart_items %}
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Cart Items</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for item in cart_items %}
+                            <div class="row align-items-center border-bottom pb-3 mb-3">
+                                <div class="col-md-2">
+                                    <img src="{{ item.image_url or 'https://via.placeholder.com/100x80?text=Product' }}" 
+                                         class="img-fluid rounded" alt="{{ item.name }}" style="height: 80px; object-fit: cover;">
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">{{ item.name }}</h6>
+                                    <p class="text-muted small mb-0">By {{ item.seller_username }}</p>
+                                    <p class="text-primary fw-bold mb-0">${{ "%.2f"|format(item.price) }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <form method="POST" action="{{ url_for('user.update_cart') }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token_value }}">
+                                        <input type="hidden" name="cart_id" value="{{ item.id }}">
+                                        <div class="input-group" style="max-width: 140px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                    onclick="decreaseQuantity('{{ item.id }}')">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" class="form-control form-control-sm text-center" 
+                                                   id="qty_{{ item.id }}" name="quantity" 
+                                                   value="{{ item.quantity }}" min="0" max="99"
+                                                   onchange="this.form.submit()">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                    onclick="increaseQuantity('{{ item.id }}')">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <p class="fw-bold mb-2">${{ "%.2f"|format(item.price * item.quantity) }}</p>
+                                    <a href="{{ url_for('user.remove_from_cart', cart_id=item.id) }}" 
+                                       class="btn btn-outline-danger btn-sm"
+                                       onclick="return confirm('Remove this item from cart?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card sticky-top">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Items ({{ cart_items|length }})</span>
+                            <span>${{ "%.2f"|format(total) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Shipping</span>
+                            <span class="text-success">FREE</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total</strong>
+                            <strong class="text-primary">${{ "%.2f"|format(total) }}</strong>
+                        </div>
+                        
+                        <a href="{{ url_for('user.checkout') }}" class="btn btn-primary btn-lg w-100 mb-2">
+                            <i class="fas fa-credit-card"></i> Proceed to Checkout
+                        </a>
+                        
+                        <a href="{{ url_for('public.browse_products') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-shopping-bag"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Your cart is empty</h4>
+                        <p class="text-muted mb-4">Add some products to your cart to get started!</p>
+                        <a href="{{ url_for('public.browse_products') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shopping-bag"></i> Start Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function increaseQuantity(cartId) {
+    const input = document.getElementById('qty_' + cartId);
+    const currentValue = parseInt(input.value);
+    input.value = currentValue + 1;
+    input.form.submit();
+}
+
+function decreaseQuantity(cartId) {
+    const input = document.getElementById('qty_' + cartId);
+    const currentValue = parseInt(input.value);
+    if (currentValue > 0) {
+        input.value = currentValue - 1;
+        input.form.submit();
+    }
+}
+</script>
+{% endblock %}
